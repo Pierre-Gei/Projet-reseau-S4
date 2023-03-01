@@ -8,90 +8,12 @@
 #include <poll.h>
 #include <arpa/inet.h>
 
+#include "structure.h"
+#include "user.h"
+#include "fonctions.h"
+
 #define PORT IPPORT_USERRESERVED // = 5000
 #define LG_Message 256
-
-typedef struct User
-{
-    int socketClient;
-    struct sockaddr_in *sockin;
-    struct User *suivant;
-    struct User *precedent;
-} User;
-
-void addUser(User **userList, int socketClient, struct sockaddr_in *sockin)
-{
-    User *newUser = malloc(sizeof(User));
-    newUser->socketClient = socketClient;
-    newUser->sockin = malloc(sizeof(struct sockaddr_in));
-    memcpy(newUser->sockin, sockin, sizeof(struct sockaddr_in));
-    newUser->suivant = NULL;
-    newUser->precedent = NULL;
-    if (*userList == NULL)
-    {
-        *userList = newUser;
-    }
-    else
-    {
-        User *tmp = *userList;
-        while (tmp->suivant != NULL)
-        {
-            tmp = tmp->suivant;
-        }
-        tmp->suivant = newUser;
-        newUser->precedent = tmp;
-    }
-}
-
-void deleteUser(User **userList, User *user)
-{
-    if (user->precedent == NULL)
-    {
-        *userList = user->suivant;
-    }
-    else
-    {
-        user->precedent->suivant = user->suivant;
-    }
-    if (user->suivant != NULL)
-    {
-        user->suivant->precedent = user->precedent;
-    }
-    free(user);
-}
-
-struct pollfd *reallocPoll(struct pollfd *tabPoll, User *userList, int socketEcoute, int * size)
-{
-    int sizeTab = 1;
-    
-    
-    User *tmp = userList;
-    while (tmp != NULL)
-    {
-        sizeTab++;
-        tmp = tmp->suivant;
-    }
-    tmp = userList;
-
-    struct pollfd *newTab = malloc(sizeof(struct pollfd) * sizeTab);
-    for (int i = 0; i < sizeTab ; i++)
-    {
-        if (i == 0)
-        {
-            newTab[i].fd = socketEcoute;
-            newTab[i].events = POLLIN;
-        }
-        else
-        {
-            newTab[i].fd = tmp->socketClient;
-            newTab[i].events = POLLIN;
-            tmp = tmp->suivant;
-        }
-    }
-    free(tabPoll);
-    *size = sizeTab;
-    return newTab;
-}
 
 int main()
 {
@@ -150,6 +72,7 @@ int main()
         poll(tab, sizeTab, 1000);
         for (int i = 0; i < sizeTab; i++)
         {
+            User *tmp = findUserBySocket(userList, tab[i].fd);
             if (tab[i].revents !=0 && i == 0)
             {
                 addUser(&userList, accept(socketEcoute, (struct sockaddr *)&pointDeRencontreDistant, &longueurAdresse), &pointDeRencontreDistant);
@@ -161,22 +84,12 @@ int main()
                 lus = read(tab[i].fd, messageRecu, LG_Message*sizeof(char));
                 if (lus == 0)
                 {
-                    User *tmp = userList;
-                    while (tmp->socketClient != tab[i].fd)
-                    {
-                        tmp = tmp->suivant;
-                    }
                     printf("Suppression d'un USER sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
                     deleteUser(&userList, tmp);
                 }
                 else
                 {
-                    printf("Message reçu : %sde %s:%d\n\n", messageRecu, inet_ntoa(pointDeRencontreDistant.sin_addr), ntohs(pointDeRencontreDistant.sin_port));
-                    User *tmp = userList;
-                    while (tmp->socketClient != tab[i].fd)
-                    {
-                        tmp = tmp->suivant;
-                    }
+                    printf("Message de %s:%d : %s\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port), messageRecu);
                     sprintf(messageEnvoi, "Ok\n");
                     ecrits = write(tmp->socketClient, messageEnvoi, strlen(messageEnvoi)*sizeof(char));
 
@@ -187,11 +100,6 @@ int main()
                     }
                     if (ecrits == 0)
                     {
-                        User *tmp = userList;
-                        while (tmp->socketClient != tab[i].fd)
-                        {
-                            tmp = tmp->suivant;
-                        }
                         printf("Suppression d'un USER sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
                         deleteUser(&userList, tmp);
                     }
@@ -204,5 +112,6 @@ int main()
     // Fermeture de la socket d'écoute
     close(socketEcoute);
     free(tab);
+    freeUserList(userList);
     return 0;
 }
