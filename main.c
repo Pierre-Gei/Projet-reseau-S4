@@ -5,22 +5,105 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h>
+#include <poll.h>
+#include <arpa/inet.h>
 
 #define PORT IPPORT_USERRESERVED // = 5000
 #define LG_Message 256
 
+typedef struct User
+{
+    int socketClient;
+    struct sockaddr_in *sockin;
+    struct User *suivant;
+    struct User *precedent;
+} User;
+
+void addUser(User **userList, int socketClient, struct sockaddr_in *sockin)
+{
+    User *newUser = malloc(sizeof(User));
+    newUser->socketClient = socketClient;
+    newUser->sockin = sockin;
+    newUser->suivant = NULL;
+    newUser->precedent = NULL;
+    if (*userList == NULL)
+    {
+        *userList = newUser;
+    }
+    else
+    {
+        User *tmp = *userList;
+        while (tmp->suivant != NULL)
+        {
+            tmp = tmp->suivant;
+        }
+        tmp->suivant = newUser;
+        newUser->precedent = tmp;
+    }
+}
+
+void deleteUser(User **userList, User *user)
+{
+    if (user->precedent == NULL)
+    {
+        *userList = user->suivant;
+    }
+    else
+    {
+        user->precedent->suivant = user->suivant;
+    }
+    if (user->suivant != NULL)
+    {
+        user->suivant->precedent = user->precedent;
+    }
+    free(user);
+}
+
+struct pollfd *reallocPoll(struct pollfd *tabPoll, User *userList, int socketEcoute, int * size)
+{
+    int sizeTab = 1;
+    
+    
+    User *tmp = userList;
+    while (tmp != NULL)
+    {
+        sizeTab++;
+        tmp = tmp->suivant;
+    }
+    tmp = userList;
+
+    struct pollfd *newTab = malloc(sizeof(struct pollfd) * sizeTab);
+    for (int i = 0; i < sizeTab ; i++)
+    {
+        if (i == 0)
+        {
+            newTab[i].fd = socketEcoute;
+            newTab[i].events = POLLIN;
+        }
+        else
+        {
+            newTab[i].fd = tmp->socketClient;
+            newTab[i].events = POLLIN;
+            tmp = tmp->suivant;
+        }
+    }
+    free(tabPoll);
+    *size = sizeTab;
+    return newTab;
+}
+
 int main()
 {
+    User *userList = NULL;
     int socketEcoute;
     struct sockaddr_in pointDeRencontreLocal;
+    struct pollfd *tab = malloc(sizeof(struct pollfd));
     socklen_t longueurAdresse;
-    int socketDialogue;
     struct sockaddr_in pointDeRencontreDistant;
     char messageEnvoi[LG_Message];
     char messageRecu[LG_Message];
+    int sizeTab = 1;
     int ecrits, lus;
-    int retour;
 
     // Création de la socket, protocole TCP
     socketEcoute = socket(PF_INET, SOCK_STREAM, 0);
@@ -62,51 +145,63 @@ int main()
     // Attente de la demande de connexion d'un client
     while (1)
     {
-        memset(messageEnvoi, 0x00, LG_Message * sizeof(char));
-        memset(messageRecu, 0x00, LG_Message * sizeof(char));
-        printf("Attente d'ue demande de connexion ...\n");
-        // appel bloquant
-        socketDialogue = accept(socketEcoute, (struct sockaddr *)&pointDeRencontreDistant, &longueurAdresse);
-        if (socketDialogue < 0)
+        tab = reallocPoll(tab, userList, socketEcoute, &sizeTab);
+        poll(tab, sizeTab, 1000);
+        for (int i = 0; i < sizeTab; i++)
         {
-            perror("accept");
-            close(socketDialogue);
-            close(socketEcoute);
-            exit(-4);
+            if (tab[i].revents !=0 && i == 0)
+            {
+                addUser(&userList, accept(socketEcoute, (struct sockaddr *)&pointDeRencontreDistant, &longueurAdresse), &pointDeRencontreDistant);
+                printf("Ajout d'un USER sur %s:%d\n\n", inet_ntoa(pointDeRencontreDistant.sin_addr), ntohs(pointDeRencontreDistant.sin_port));
+            }
+            if (tab[i].revents != 0 && i > 0)
+            {
+                memset(messageRecu, 0x00, LG_Message*sizeof(char));
+                lus = read(tab[i].fd, messageRecu, LG_Message*sizeof(char));
+                if (lus == 0)
+                {
+                    User *tmp = userList;
+                    while (tmp->socketClient != tab[i].fd)
+                    {
+                        tmp = tmp->suivant;
+                    }
+                    printf("Suppression d'un USER sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
+                    deleteUser(&userList, tmp);
+                }
+                else
+                {
+                    printf("Message reçu : %sde %s:%d\n\n", messageRecu, inet_ntoa(pointDeRencontreDistant.sin_addr), ntohs(pointDeRencontreDistant.sin_port));
+                    User *tmp = userList;
+                    while (tmp->socketClient != tab[i].fd)
+                    {
+                        tmp = tmp->suivant;
+                    }
+                    sprintf(messageEnvoi, "Ok\n");
+                    ecrits = write(tmp->socketClient, messageEnvoi, strlen(messageEnvoi)*sizeof(char));
+
+                    if (ecrits < 0)
+                    {
+                        perror("write");
+                        exit(-4);
+                    }
+                    if (ecrits == 0)
+                    {
+                        User *tmp = userList;
+                        while (tmp->socketClient != tab[i].fd)
+                        {
+                            tmp = tmp->suivant;
+                        }
+                        printf("Suppression d'un USER sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
+                        deleteUser(&userList, tmp);
+                    }
+                }
+            }
+
         }
-        // Reception du message
-        lus = read(socketDialogue, messageRecu, LG_Message * sizeof(char));
-        switch (lus)
-        {
-        case -1: /*Erreur*/
-            perror("read");
-            close(socketDialogue);
-            exit(-5);
-        case 0: /*Socket fermée*/
-            fprintf(stderr, "Socket fermée par le client !\n\n");
-            close(socketDialogue);
-        default: /*Message reçu*/
-            printf("Message reçu : %s (%d octets)\n", messageRecu, lus);
-        }
-        // Envoi du message
-        sprintf(messageEnvoi, "ok\n");
-        ecrits = write(socketDialogue, messageEnvoi, strlen(messageEnvoi));
-        switch (ecrits)
-        {
-        case -1: /*Erreur*/
-            perror("write");
-            close(socketDialogue);
-            exit(-6);
-        case 0: /*Socket fermée*/
-            fprintf(stderr, "Socket fermée par le client !\n\n");
-            close(socketDialogue);
-        default: /*Message envoyé*/
-            printf("Message envoyé : %s (%d octets)\n", messageEnvoi, ecrits);
-        }
-        // Fermeture de la socket de dialogue
-        close(socketDialogue);
+
     }
     // Fermeture de la socket d'écoute
     close(socketEcoute);
+    free(tab);
     return 0;
 }
