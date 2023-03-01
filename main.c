@@ -23,7 +23,8 @@ void addUser(User **userList, int socketClient, struct sockaddr_in *sockin)
 {
     User *newUser = malloc(sizeof(User));
     newUser->socketClient = socketClient;
-    newUser->sockin = sockin;
+    newUser->sockin = malloc(sizeof(struct sockaddr_in));
+    memcpy(newUser->sockin, sockin, sizeof(struct sockaddr_in));
     newUser->suivant = NULL;
     newUser->precedent = NULL;
     if (*userList == NULL)
