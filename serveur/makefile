@@ -8,7 +8,7 @@ user.o: user.c
 	gcc -c user.c
 
 fonctions.o: fonctions.c
-	gcc -c fonctions.c
-
+	gcc -c fonctions.c -lunistd
+ 
 clean:
 	rm -f main main.o

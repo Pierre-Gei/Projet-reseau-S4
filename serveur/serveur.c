@@ -80,8 +80,10 @@ int main()
             }
             if (tab[i].revents != 0 && i > 0)
             {
+                
                 memset(messageRecu, 0x00, LG_Message*sizeof(char));
                 lus = read(tab[i].fd, messageRecu, LG_Message*sizeof(char));
+                readCommand(messageRecu);
                 if (lus == 0)
                 {
                     printf("Suppression d'un USER sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
