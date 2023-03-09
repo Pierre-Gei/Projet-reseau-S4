@@ -12,11 +12,28 @@
 #include "user.h"
 #include "fonctions.h"
 
-#define PORT IPPORT_USERRESERVED // = 5000
 #define LG_Message 256
 
-int main()
+int main(int argc, char *argv[])
 {
+    int PORT = IPPORT_USERRESERVED;
+    for (int i = 0; i < argc; i++)
+    {
+        printf("argv[%d]: %s ", i, argv[i]);
+        if(strcmp(argv[i], "-p") == 0)
+        {
+            printf("port: %d", atoi(argv[i+1]));
+            if (atoi(argv[i+1]) > 0)
+            {
+                PORT = atoi(argv[i+1]);
+            }
+            else
+            {
+                printf("Port invalide, port par défaut: %d", PORT);
+            }
+        }
+    }
+
     User *userList = NULL;
     int socketEcoute;
     struct sockaddr_in pointDeRencontreLocal;
