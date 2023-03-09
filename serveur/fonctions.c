@@ -37,14 +37,14 @@ struct pollfd *reallocPoll(struct pollfd *tabPoll, User *userList, int socketEco
             tmp = tmp->suivant;
         }
     }
-    free(tabPoll);
+    free(tabPoll); 
     *size = sizeTab;
     return newTab;
 }
 
 // fonction qui lit une commande avec des parametres
 
-void readCommand(char *messageRecu)
+void readCommand(char *messageRecu, char *messageEnvoi)
 {
     printf("messageRecu: %s\n", messageRecu);
     int len = strcspn(messageRecu, "\n");
@@ -52,6 +52,8 @@ void readCommand(char *messageRecu)
 
     int argc = 0;
     char *argv[100];
+    char *dimension[20];
+    int size_dim = 0;
 
     char *token = strtok(messageRecu, " ");
     while (token != NULL)
@@ -69,4 +71,40 @@ void readCommand(char *messageRecu)
     {
         printf("getSize\n");
     }
+    else if (strcmp(argv[0], "/setPixel") == 0)
+    {
+        printf("setPixel\n");
+         if (argc == 3)
+        {
+            while (argv[1] != NULL)
+            {
+                token = strtok(argv[1], "x");
+                while (token != NULL)
+                {
+                    printf("token: %s\n", token);
+                    dimension[size_dim++] = token;
+                    token = strtok(NULL, "x");
+                }
+                argv[1] = NULL;
+            }
+        strcpy(messageEnvoi, "00 OK\n");
+        }
+        else
+        {
+            strcpy(messageEnvoi, "10 Bad command\n");
+        }
+    }
+    else if (strcmp(argv[0], "/getLimits") == 0)
+    {
+        printf("getLimits\n");
+    }
+    else if (strcmp(argv[0], "/getVersion") == 0)
+    {
+        printf("getVersion\n");
+    }
+    else
+    {
+        strcpy(messageEnvoi, "99 Unknown command\n");
+    }
 }
+

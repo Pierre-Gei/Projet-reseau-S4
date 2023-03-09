@@ -27,6 +27,7 @@ int main()
     char messageRecu[LG_Message];
     int sizeTab = 1;
     int ecrits, lus;
+    int error;
 
     // Création de la socket, protocole TCP
     socketEcoute = socket(PF_INET, SOCK_STREAM, 0);
@@ -83,7 +84,7 @@ int main()
                 
                 memset(messageRecu, 0x00, LG_Message*sizeof(char));
                 lus = read(tab[i].fd, messageRecu, LG_Message*sizeof(char));
-                readCommand(messageRecu);
+                readCommand(messageRecu, messageEnvoi);
                 if (lus == 0)
                 {
                     printf("Suppression d'un USER sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
@@ -92,7 +93,7 @@ int main()
                 else
                 {
                     printf("Message de %s:%d : %s\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port), messageRecu);
-                    sprintf(messageEnvoi, "Ok\n");
+                    // sprintf(messageEnvoi, "Ok\n");
                     ecrits = write(tmp->socketClient, messageEnvoi, strlen(messageEnvoi)*sizeof(char));
 
                     if (ecrits < 0)
@@ -113,7 +114,6 @@ int main()
     }
     // Fermeture de la socket d'écoute
     close(socketEcoute);
-    free(tab);
     freeUserList(userList);
     return 0;
 }
