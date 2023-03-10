@@ -5,3 +5,12 @@ typedef struct User
     struct User *suivant;
     struct User *precedent;
 } User;
+
+typedef struct Matrix
+{
+    int width;
+    int height;
+    int pixel_min;
+}Matrix;
+
+Matrix initMatrix(Matrix m);

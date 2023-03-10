@@ -37,9 +37,46 @@ struct pollfd *reallocPoll(struct pollfd *tabPoll, User *userList, int socketEco
             tmp = tmp->suivant;
         }
     }
-    free(tabPoll); 
+    free(tabPoll);
     *size = sizeTab;
     return newTab;
+}
+
+void setServer(int argc, char *argv[], int *PORT, Matrix *matrix)
+{
+    *PORT = IPPORT_USERRESERVED;
+    matrix->width = 80;
+    matrix->height = 40;
+    matrix->pixel_min = 10;
+    for (int i = 0; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-p") == 0 && atoi(argv[i + 1]) > 0)
+        {
+                *PORT = atoi(argv[i + 1]);
+        }
+
+        if (strcmp(argv[i], "-s") == 0)
+        {
+            char *dimensions[20];
+            char *token = strtok(argv[i + 1], "x");
+            int size = 0;
+            while (token != NULL)
+            {
+                dimensions[size++] = token;
+                token = strtok(NULL, "x");
+            }
+            if (size == 2 && atoi(dimensions[0]) > 0 && atoi(dimensions[1]) > 0)
+            {
+                matrix->width = atoi(dimensions[0]);
+                matrix->height = atoi(dimensions[1]);
+            }
+        }
+
+        if (strcmp(argv[i], "-l") == 0 && atoi(argv[i + 1]) > 0)
+        {
+            matrix->pixel_min = atoi(argv[i + 1]);
+        }
+    }
 }
 
 // fonction qui lit une commande avec des parametres
@@ -74,7 +111,7 @@ void readCommand(char *messageRecu, char *messageEnvoi)
     else if (strcmp(argv[0], "/setPixel") == 0)
     {
         printf("setPixel\n");
-         if (argc == 3)
+        if (argc == 3)
         {
             while (argv[1] != NULL)
             {
@@ -87,7 +124,7 @@ void readCommand(char *messageRecu, char *messageEnvoi)
                 }
                 argv[1] = NULL;
             }
-        strcpy(messageEnvoi, "00 OK\n");
+            strcpy(messageEnvoi, "00 OK\n");
         }
         else
         {
@@ -107,4 +144,3 @@ void readCommand(char *messageRecu, char *messageEnvoi)
         strcpy(messageEnvoi, "99 Unknown command\n");
     }
 }
-

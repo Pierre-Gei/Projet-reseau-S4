@@ -16,24 +16,12 @@
 
 int main(int argc, char *argv[])
 {
-    int PORT = IPPORT_USERRESERVED;
-    for (int i = 0; i < argc; i++)
-    {
-        printf("argv[%d]: %s ", i, argv[i]);
-        if(strcmp(argv[i], "-p") == 0)
-        {
-            printf("port: %d", atoi(argv[i+1]));
-            if (atoi(argv[i+1]) > 0)
-            {
-                PORT = atoi(argv[i+1]);
-            }
-            else
-            {
-                printf("Port invalide, port par défaut: %d", PORT);
-            }
-        }
-    }
-
+    Matrix matrix = initMatrix(matrix);
+    int PORT = 0;
+    setServer(argc, argv, &PORT, &matrix);
+    printf("\nPort: %d\n", PORT);
+    printf("Matrix: %d %d\n", matrix.width, matrix.height);
+    printf("Pixel min: %d\n", matrix.pixel_min);
     User *userList = NULL;
     int socketEcoute;
     struct sockaddr_in pointDeRencontreLocal;

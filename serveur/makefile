@@ -1,5 +1,8 @@
-serveur : serveur.o user.o fonctions.o
-	gcc -o serveur serveur.o user.o fonctions.o -Wall
+serveur : structure.o serveur.o user.o fonctions.o
+	gcc -o serveur structure.o serveur.o user.o fonctions.o -Wall
+
+structure.o: structure.c
+	gcc -c structure.c
 
 serveur.o: serveur.c
 	gcc -c serveur.c
