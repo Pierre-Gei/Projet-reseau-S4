@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 
 #include "structure.h"
+#include "matrices.h"
 
 struct pollfd *reallocPoll(struct pollfd *tabPoll, User *userList, int socketEcoute, int *size)
 {
@@ -77,6 +78,8 @@ void setServer(int argc, char *argv[], int *PORT, Matrix *matrix)
             matrix->pixel_min = atoi(argv[i + 1]);
         }
     }
+    initPixelsMatrix(matrix);
+    // printMatrix(*matrix);
 }
 
 // fonction qui lit une commande avec des parametres

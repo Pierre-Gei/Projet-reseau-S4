@@ -11,7 +11,12 @@ typedef struct Matrix
     int width;
     int height;
     int pixel_min;
-    char **pixels;
+    char ***pixels;
 }Matrix;
 
+/*Initialiser la structure à 0*/
 Matrix initMatrix(Matrix m);
+/*Initialiser la matrice à la taille width et height*/
+void initPixelsMatrix(Matrix *m);
+/*Libérer la matrices*/
+void freeMatrix(Matrix m);

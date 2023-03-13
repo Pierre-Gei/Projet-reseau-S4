@@ -1,5 +1,5 @@
-serveur : structure.o serveur.o user.o fonctions.o
-	gcc -o serveur structure.o serveur.o user.o fonctions.o -Wall
+serveur : structure.o serveur.o user.o fonctions.o matrices.o
+	gcc -o serveur structure.o serveur.o user.o fonctions.o matrices.o -Wall
 
 structure.o: structure.c
 	gcc -c structure.c
@@ -12,6 +12,9 @@ user.o: user.c
 
 fonctions.o: fonctions.c
 	gcc -c fonctions.c -lunistd
+
+matrices.o: matrices.c
+	gcc -c matrices.c
  
 clean:
 	rm -f main main.o

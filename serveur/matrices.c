@@ -41,7 +41,10 @@ void convert_BASE_64_RGB(char *base64, int *r, int *g, int *b)
 
 //add change a pixel in the matrix
 void editPixel(Matrix m, int x, int y, char *base64){
-    m.pixels[x][y] = base64;
+    if (x >= 0 && x < m.width && y >= 0 && y < m.height)
+    {
+        strcpy(m.pixels[y][x], base64);
+    }
 }
 
 void printMatrix(Matrix m)
@@ -51,8 +54,7 @@ void printMatrix(Matrix m)
     {
         for (j = 0; j < m.width; j++)
         {
-            printf("[%s]", m.pixels[i][j]);
+            printf("[%s] ", m.pixels[i][j]);
         }
-        printf("\n");
     }
 }
