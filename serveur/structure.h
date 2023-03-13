@@ -11,6 +11,7 @@ typedef struct Matrix
     int width;
     int height;
     int pixel_min;
+    char **pixels;
 }Matrix;
 
 Matrix initMatrix(Matrix m);
