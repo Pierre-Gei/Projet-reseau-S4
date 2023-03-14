@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     struct pollfd *tab = malloc(sizeof(struct pollfd));
     socklen_t longueurAdresse;
     struct sockaddr_in pointDeRencontreDistant;
-    char messageEnvoi[LG_Message];
+    char messageEnvoi[matrix.height*matrix.width*4];
     char messageRecu[LG_Message];
     int sizeTab = 1;
     int ecrits, lus;
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
                 
                 memset(messageRecu, 0x00, LG_Message*sizeof(char));
                 lus = read(tab[i].fd, messageRecu, LG_Message*sizeof(char));
-                readCommand(messageRecu, messageEnvoi);
+                readCommand(messageRecu, messageEnvoi, &matrix);
                 if (lus == 0)
                 {
                     printf("Suppression d'un USER sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));

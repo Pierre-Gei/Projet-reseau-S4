@@ -84,7 +84,7 @@ void setServer(int argc, char *argv[], int *PORT, Matrix *matrix)
 
 // fonction qui lit une commande avec des parametres
 
-void readCommand(char *messageRecu, char *messageEnvoi)
+void readCommand(char *messageRecu, char *messageEnvoi,Matrix *matrix)
 {
     printf("messageRecu: %s\n", messageRecu);
     int len = strcspn(messageRecu, "\n");
@@ -92,6 +92,7 @@ void readCommand(char *messageRecu, char *messageEnvoi)
 
     int argc = 0;
     char *argv[100];
+    char afficheM[matrix->height*matrix->width*4];
     char *dimension[20];
     int size_dim = 0;
 
@@ -105,11 +106,22 @@ void readCommand(char *messageRecu, char *messageEnvoi)
 
     if (strcmp(argv[0], "/getMatrix") == 0)
     {
-        printf("getMatrix\n");
+        char Temp[6];
+        for (int i = 0; i < matrix->height; i++)
+        {
+            for (int j = 0; j < matrix->width; j++)
+            {
+                strcat(afficheM,strcpy(Temp,matrix->pixels[i][j]));
+            }
+        }
+        printf("%s",afficheM);
+        strcpy(messageEnvoi, afficheM);
     }
     else if (strcmp(argv[0], "/getSize") == 0)
     {
-        printf("getSize\n");
+        char s[10];
+        sprintf(s,"%dx%d",matrix->width,matrix->height);
+        strcpy(messageEnvoi, s);
     }
     else if (strcmp(argv[0], "/setPixel") == 0)
     {
@@ -127,6 +139,7 @@ void readCommand(char *messageRecu, char *messageEnvoi)
                 }
                 argv[1] = NULL;
             }
+            strcpy(matrix->pixels[atoi(dimension[0])][atoi(dimension[1])],argv[2]);
             strcpy(messageEnvoi, "00 OK\n");
         }
         else
