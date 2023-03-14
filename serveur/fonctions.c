@@ -106,12 +106,12 @@ void readCommand(char *messageRecu, char *messageEnvoi,Matrix *matrix)
 
     if (strcmp(argv[0], "/getMatrix") == 0)
     {
-        char Temp[6];
+        int pos = 0;
         for (int i = 0; i < matrix->height; i++)
         {
             for (int j = 0; j < matrix->width; j++)
             {
-                strcat(afficheM,strcpy(Temp,matrix->pixels[i][j]));
+                pos += sprintf(afficheM + pos, "%s", matrix->pixels[i][j]);
             }
         }
         printf("%s",afficheM);
