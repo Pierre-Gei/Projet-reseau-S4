@@ -47,6 +47,7 @@ void deleteUser(User **userList, User *user)
     {
         user->suivant->precedent = user->precedent;
     }
+    free(user->sockin);
     free(user);
 }
 
@@ -70,6 +71,7 @@ void freeUserList(User *userList)
     while (tmp != NULL)
     {
         userList = userList->suivant;
+        free(tmp->sockin);
         free(tmp);
         tmp = userList;
     }

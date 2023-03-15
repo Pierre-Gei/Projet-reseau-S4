@@ -16,7 +16,8 @@
 
 int main(int argc, char *argv[])
 {
-    Matrix matrix = initMatrix(matrix);
+    Matrix matrix;
+    matrix = initMatrix(matrix);
     int PORT = 0;
     setServer(argc, argv, &PORT, &matrix);
     printf("\nPort: %d\n", PORT);
