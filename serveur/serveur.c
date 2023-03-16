@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     struct pollfd *tab = malloc(sizeof(struct pollfd));
     socklen_t longueurAdresse;
     struct sockaddr_in pointDeRencontreDistant;
-    char messageEnvoi[matrix.height*matrix.width*4];
+    char messageEnvoi[matrix.height * matrix.width * 4];
     char messageRecu[LG_Message];
     int sizeTab = 1;
     int ecrits, lus;
@@ -80,43 +80,51 @@ int main(int argc, char *argv[])
         for (int i = 0; i < sizeTab; i++)
         {
             User *tmp = findUserBySocket(userList, tab[i].fd);
-            if (tab[i].revents !=0 && i == 0)
+            if (tab[i].revents != 0 && i == 0)
             {
-                addUser(&userList, accept(socketEcoute, (struct sockaddr *)&pointDeRencontreDistant, &longueurAdresse), &pointDeRencontreDistant);
+                addUser(&userList, accept(socketEcoute, (struct sockaddr *)&pointDeRencontreDistant, &longueurAdresse), &pointDeRencontreDistant, matrix.pixel_min);
                 printf("Ajout d'un USER sur %s:%d\n\n", inet_ntoa(pointDeRencontreDistant.sin_addr), ntohs(pointDeRencontreDistant.sin_port));
             }
             if (tab[i].revents != 0 && i > 0)
             {
-                
-                memset(messageRecu, 0x00, LG_Message*sizeof(char));
-                lus = read(tab[i].fd, messageRecu, LG_Message*sizeof(char));
-                readCommand(messageRecu, messageEnvoi, &matrix);
-                if (lus == 0)
+
+                memset(messageRecu, 0x00, LG_Message * sizeof(char));
+                lus = read(tab[i].fd, messageRecu, LG_Message * sizeof(char));
+                if (lus < 0)
+                {
+                    perror("read");
+                    exit(-4);
+                }
+                else if (lus == 0)
                 {
                     printf("Suppression d'un USER sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
                     deleteUser(&userList, tmp);
                 }
                 else
                 {
-                    printf("Message de %s:%d : %s\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port), messageRecu);
-                    // sprintf(messageEnvoi, "Ok\n");
-                    ecrits = write(tmp->socketClient, messageEnvoi, strlen(messageEnvoi)*sizeof(char));
+                    if (strlen(messageRecu) > 0)
+                    {
+                        printf("Message de %s:%d : %s\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port), messageRecu);
+                        readCommand(messageRecu, messageEnvoi, &matrix);
+                        // sprintf(messageEnvoi, "Ok\n");
+                        ecrits = write(tmp->socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
 
-                    if (ecrits < 0)
-                    {
-                        perror("write");
-                        exit(-4);
+                        if (ecrits < 0)
+                        {
+                            perror("write");
+                            exit(-4);
+                        }
+                        if (ecrits == 0)
+                        {
+                            printf("Suppression d'un USER sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
+                            deleteUser(&userList, tmp);
+                        }
                     }
-                    if (ecrits == 0)
-                    {
-                        printf("Suppression d'un USER sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
-                        deleteUser(&userList, tmp);
-                    }
+                    else
+                        continue;
                 }
             }
-
         }
-
     }
     // Fermeture de la socket d'écoute
     close(socketEcoute);

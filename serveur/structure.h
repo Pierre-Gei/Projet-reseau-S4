@@ -2,6 +2,8 @@ typedef struct User
 {
     int socketClient;
     struct sockaddr_in *sockin;
+    int pixel;
+    int temps;
     struct User *suivant;
     struct User *precedent;
 } User;

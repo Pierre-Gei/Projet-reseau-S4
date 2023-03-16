@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
     sprintf(messageEnvoi, "/getSize");
 
-    ecrits = write(socketClient, messageEnvoi, strlen(messageEnvoi)*sizeof(char));
+    ecrits = write(socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
 
     if (ecrits < 0)
     {
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
         exit(-3);
     }
     char dim[20];
-    lus = read(socketClient, dim, 20*sizeof(char));
+    lus = read(socketClient, dim, 20 * sizeof(char));
 
     if (lus < 0)
     {
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     }
     int largeur, hauteur;
     sscanf(dim, "%dx%d", &largeur, &hauteur);
-    int SIZE = largeur * hauteur * 4 +1;
+    int SIZE = largeur * hauteur * 4 + 1;
     printf("Largeur: %d, Hauteur: %d \n", largeur, hauteur);
     char messageRecu[SIZE];
 
@@ -83,37 +83,43 @@ int main(int argc, char *argv[])
     while (1)
     {
         printf("Message à envoyer : ");
-        fgets(messageEnvoi, LG_Message*sizeof(char), stdin);
+        fgets(messageEnvoi, LG_Message * sizeof(char), stdin);
 
         // Suppression du caractère de fin de ligne
-        messageEnvoi[strlen(messageEnvoi)-1] = '\0';
+        messageEnvoi[strlen(messageEnvoi) - 1] = '\0';
 
         // Envoi du message au serveur
-        ecrits = write(socketClient, messageEnvoi, strlen(messageEnvoi)*sizeof(char));
+        ecrits = write(socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
 
         if (ecrits < 0)
         {
             perror("write");
             exit(-3);
         }
-
-        // Réception de la réponse du serveur
-        memset(messageRecu, 0x00, SIZE);
-        lus = read(socketClient, messageRecu, SIZE);
-
-        if (lus < 0)
+        if (strlen(messageEnvoi) == 0)
         {
-            perror("read");
-            exit(-4);
-        }
-        else if (lus == 0)
-        {
-            printf("Le serveur a coupé la connexion.\n");
-            break;
+            printf("Message vide \n");
         }
         else
         {
-            printf("Réponse du serveur : %s\n\n", messageRecu);
+            // Réception de la réponse du serveur
+            memset(messageRecu, 0x00, SIZE);
+            lus = read(socketClient, messageRecu, SIZE);
+
+            if (lus < 0)
+            {
+                perror("read");
+                exit(-4);
+            }
+            else if (lus == 0)
+            {
+                printf("Le serveur a coupé la connexion.\n");
+                break;
+            }
+            else
+            {
+                printf("Réponse du serveur : %s\n\n", messageRecu);
+            }
         }
     }
 

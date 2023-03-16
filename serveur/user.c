@@ -9,12 +9,14 @@
 #include <arpa/inet.h>
 #include "structure.h"
 
-void addUser(User **userList, int socketClient, struct sockaddr_in *sockin)
+void addUser(User **userList, int socketClient, struct sockaddr_in *sockin, int pixel)
 {
     User *newUser = malloc(sizeof(User));
     newUser->socketClient = socketClient;
     newUser->sockin = malloc(sizeof(struct sockaddr_in));
     memcpy(newUser->sockin, sockin, sizeof(struct sockaddr_in));
+    newUser->pixel = pixel;
+    newUser->temps = 0;
     newUser->suivant = NULL;
     newUser->precedent = NULL;
     if (*userList == NULL)
