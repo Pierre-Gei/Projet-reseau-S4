@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <poll.h>
 #include <arpa/inet.h>
+#include <time.h>
 
 #include "structure.h"
 #include "matrices.h"
@@ -53,7 +54,7 @@ void setServer(int argc, char *argv[], int *PORT, Matrix *matrix)
     {
         if (strcmp(argv[i], "-p") == 0 && atoi(argv[i + 1]) > 0)
         {
-                *PORT = atoi(argv[i + 1]);
+            *PORT = atoi(argv[i + 1]);
         }
 
         if (strcmp(argv[i], "-s") == 0)
@@ -81,25 +82,36 @@ void setServer(int argc, char *argv[], int *PORT, Matrix *matrix)
     initPixelsMatrix(matrix);
     // printMatrix(*matrix);
 }
+void timeOut( User *userList, Matrix *matrix)
+{
+    User *tmp = userList;
+    time_t now = time(NULL);
+    if (tmp->pixel < matrix->pixel_min)
+    {
+        if (difftime(now, tmp->time) > 60)
+        {
+            tmp->pixel = matrix->pixel_min;
+        }
+    }
+}
 
 // fonction qui lit une commande avec des parametres
 
-void readCommand(char *messageRecu, char *messageEnvoi,Matrix *matrix, User *user)
+void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *user)
 {
-    printf("messageRecu: %s\n", messageRecu);
+    printf("pixel : %d\n", user->pixel);
     int len = strcspn(messageRecu, "\n");
     messageRecu[len] = '\0';
 
     int argc = 0;
     char *argv[100];
-    char afficheM[matrix->height*matrix->width*4];
+    char afficheM[matrix->height * matrix->width * 4];
     char *dimension[20];
     int size_dim = 0;
 
     char *token = strtok(messageRecu, " ");
     while (token != NULL)
     {
-        printf("token: %s\n", token);
         argv[argc++] = token;
         token = strtok(NULL, " ");
     }
@@ -114,18 +126,16 @@ void readCommand(char *messageRecu, char *messageEnvoi,Matrix *matrix, User *use
                 pos += sprintf(afficheM + pos, "%s", matrix->pixels[i][j]);
             }
         }
-        printf("%s",afficheM);
         strcpy(messageEnvoi, afficheM);
     }
     else if (strcmp(argv[0], "/getSize") == 0)
     {
         char s[10];
-        sprintf(s,"%dx%d",matrix->width,matrix->height);
+        sprintf(s, "%dx%d", matrix->width, matrix->height);
         strcpy(messageEnvoi, s);
     }
     else if (strcmp(argv[0], "/setPixel") == 0)
     {
-        printf("setPixel\n");
         if (argc == 3)
         {
             while (argv[1] != NULL)
@@ -133,16 +143,32 @@ void readCommand(char *messageRecu, char *messageEnvoi,Matrix *matrix, User *use
                 token = strtok(argv[1], "x");
                 while (token != NULL)
                 {
-                    printf("token: %s\n", token);
                     dimension[size_dim++] = token;
                     token = strtok(NULL, "x");
                 }
                 argv[1] = NULL;
             }
-            strcpy(matrix->pixels[atoi(dimension[0])][atoi(dimension[1])],argv[2]);
-            // user->pixel--;
-            // printf("pixel: %d",user->pixel);
-            strcpy(messageEnvoi, "00 OK\n");
+            if (atoi(dimension[0]) >= matrix->width || atoi(dimension[1]) >= matrix->height || atoi(dimension[0]) < 0 || atoi(dimension[1]) < 0)
+            {
+                strcpy(messageEnvoi, "11 Pixel out of bound\n");
+                return;
+            }
+            timeOut(user, matrix);
+            if (user->pixel > 0)
+            {
+                if(user->pixel == matrix->pixel_min)
+                {
+                    user->time = time(NULL);
+                }
+                strcpy(matrix->pixels[atoi(dimension[1])][atoi(dimension[0])], argv[2]);
+                user->pixel--;
+                printf ("pixel apres : %d\n", user->pixel);
+                strcpy(messageEnvoi, "00 OK\n");
+            }
+            else 
+            {
+                strcpy(messageEnvoi, "20 Out of quota\n");
+            }
         }
         else
         {
@@ -162,3 +188,4 @@ void readCommand(char *messageRecu, char *messageEnvoi,Matrix *matrix, User *use
         strcpy(messageEnvoi, "99 Unknown command\n");
     }
 }
+
