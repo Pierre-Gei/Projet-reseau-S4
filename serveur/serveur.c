@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
             }
             if (tab[i].revents != 0 && i > 0)
             {
-
+                
                 memset(messageRecu, 0x00, LG_Message * sizeof(char));
                 lus = read(tab[i].fd, messageRecu, LG_Message * sizeof(char));
                 if (lus < 0)
@@ -123,7 +123,6 @@ int main(int argc, char *argv[])
                     else
                         continue;
                 }
-                
             }
         }
     }

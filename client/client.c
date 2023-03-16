@@ -13,15 +13,16 @@ int main(int argc, char *argv[])
 {
     int PORT = 0;
     char *ip;
-    if (argc == 3)
+    for (int i = 0; i < argc; i++)
     {
-        ip = argv[1];
-        PORT = atoi(argv[2]);
-    }
-    else
-    {
-        printf("Usage: %s <ip> <port>\n", argv[0]);
-        return 1;
+        if (strcmp(argv[i], "-s") == 0)
+        {
+            ip = argv[i + 1];
+        }
+        if (strcmp(argv[i], "-p") == 0 && atoi(argv[i + 1]) > 0)
+        {
+            PORT = atoi(argv[i + 1]);
+        }
     }
 
     int socketClient;
