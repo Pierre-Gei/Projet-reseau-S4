@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <poll.h>
 #include <arpa/inet.h>
+#include <time.h>
 
 #include "structure.h"
 #include "user.h"
@@ -105,7 +106,7 @@ int main(int argc, char *argv[])
                     if (strlen(messageRecu) > 0)
                     {
                         printf("Message de %s:%d : %s\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port), messageRecu);
-                        readCommand(messageRecu, messageEnvoi, &matrix);
+                        readCommand(messageRecu, messageEnvoi, &matrix, tmp);
                         // sprintf(messageEnvoi, "Ok\n");
                         ecrits = write(tmp->socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
 

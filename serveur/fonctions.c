@@ -84,7 +84,7 @@ void setServer(int argc, char *argv[], int *PORT, Matrix *matrix)
 
 // fonction qui lit une commande avec des parametres
 
-void readCommand(char *messageRecu, char *messageEnvoi,Matrix *matrix)
+void readCommand(char *messageRecu, char *messageEnvoi,Matrix *matrix, User *user)
 {
     printf("messageRecu: %s\n", messageRecu);
     int len = strcspn(messageRecu, "\n");
@@ -140,6 +140,8 @@ void readCommand(char *messageRecu, char *messageEnvoi,Matrix *matrix)
                 argv[1] = NULL;
             }
             strcpy(matrix->pixels[atoi(dimension[0])][atoi(dimension[1])],argv[2]);
+            // user->pixel--;
+            // printf("pixel: %d",user->pixel);
             strcpy(messageEnvoi, "00 OK\n");
         }
         else
