@@ -11,6 +11,11 @@
 
 int main(int argc, char *argv[])
 {
+    if (argc < 4)
+    {
+        printf("Invalid arguments \n");
+        exit(-1);
+    }
     int PORT = 0;
     char *ip;
     for (int i = 0; i < argc; i++)

@@ -177,11 +177,23 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
     }
     else if (strcmp(argv[0], "/getLimits") == 0)
     {
-        printf("getLimits\n");
+        sprintf(messageEnvoi, "%d", matrix->pixel_min);
     }
     else if (strcmp(argv[0], "/getVersion") == 0)
     {
-        printf("getVersion\n");
+        strcpy(messageEnvoi, "1.0");
+    }
+    else if (strcmp(argv[0], "/getWaitTime") == 0)
+    {
+        timeOut(user, matrix);
+        if (user->pixel > 0)
+        {
+            strcpy(messageEnvoi, "0\n");
+        }
+        else 
+        {
+            sprintf(messageEnvoi, "%d\n", (int)(60 - difftime(time(NULL), user->time)));
+        }
     }
     else
     {
