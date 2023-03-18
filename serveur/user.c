@@ -67,14 +67,14 @@ User *findUserBySocket(User *userList, int socket)
     return NULL;
 }
 
-void freeUserList(User *userList)
+void freeUserList(User *userList) //////////////// a tester
 {
     User *tmp = userList;
     while (tmp != NULL)
     {
-        userList = userList->suivant;
+        User *suivant = tmp->suivant;
         free(tmp->sockin);
         free(tmp);
-        tmp = userList;
+        tmp = suivant;
     }
 }

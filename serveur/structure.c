@@ -30,12 +30,16 @@ void initPixelsMatrix(Matrix *m)
     }
 }
 
-// free the matrix
+// free the matrix //////////////////////// a tester
 void freeMatrix(Matrix m)
 {
-    int i;
+    int i, j;
     for (i = 0; i < m.height; i++)
     {
+        for (j = 0; j < m.width; j++)
+        {
+            free(m.pixels[i][j]);
+        }
         free(m.pixels[i]);
     }
     free(m.pixels);

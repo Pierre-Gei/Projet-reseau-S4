@@ -39,7 +39,7 @@ struct pollfd *reallocPoll(struct pollfd *tabPoll, User *userList, int socketEco
             tmp = tmp->suivant;
         }
     }
-    free(tabPoll);
+    // free(tabPoll);
     *size = sizeTab;
     return newTab;
 }
@@ -97,7 +97,7 @@ void timeOut( User *userList, Matrix *matrix)
 
 // fonction qui lit une commande avec des parametres
 
-void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *user)
+void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *user) ///// a tester
 {
     printf("pixel : %d\n", user->pixel);
     int len = strcspn(messageRecu, "\n");

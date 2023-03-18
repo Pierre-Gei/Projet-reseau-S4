@@ -1,8 +1,6 @@
 serveur : structure.o serveur.o user.o fonctions.o matrices.o 
 	gcc -g -static -o serveur structure.o serveur.o user.o fonctions.o matrices.o -Wall
 
-test: structure.o test.o user.o fonctions.o matrices.o 
-	gcc -g -static -o test structure.o test.o user.o fonctions.o matrices.o -Wall -lcunit
 structure.o: structure.c
 	gcc -g -c structure.c -lcunit
 
@@ -17,9 +15,6 @@ fonctions.o: fonctions.c
 
 matrices.o: matrices.c
 	gcc -g -c matrices.c -lcunit
-
-test.o: test.c
-	gcc -g -c test.c -lcunit
  
 clean:
 	rm -f serveur test *.o 
