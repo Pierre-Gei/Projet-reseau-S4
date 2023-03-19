@@ -2,6 +2,9 @@
     "files.associations": {
         "fonctions.h": "c",
         "matrices.h": "c",
-        "structure.h": "c"
+        "structure.h": "c",
+        "math.h": "c",
+        "test_structure.h": "c",
+        "basic.h": "c"
     }
 }

@@ -11,6 +11,7 @@
 #include "test_user.h"
 #include "test_fonctions.h"
 #include "test_structure.h"
+#include "test_matrices.h"
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
@@ -40,6 +41,12 @@ int main() {
 
     // CU_pSuite suite_freeMatrix = CU_add_suite("freeMatrix", NULL, NULL); ////echec
     // CU_add_test(suite_freeMatrix, "test_freeMatrix", test_freeMatrix);
+
+    CU_pSuite suite_test_convert_RGB_BASE_64 = CU_add_suite("convert_RGB_BASE_64", NULL, NULL);
+    CU_add_test(suite_test_convert_RGB_BASE_64, "test_convert_RGB_BASE_64", test_convert_RGB_BASE_64);
+
+    CU_pSuite suite_test_convert_BASE_64_RGB = CU_add_suite("convert_BASE_64_RGB", NULL, NULL);
+    CU_add_test(suite_test_convert_BASE_64_RGB, "test_convert_BASE_64_RGB", test_convert_BASE_64_RGB);
 
     CU_basic_run_tests();
     CU_cleanup_registry();
