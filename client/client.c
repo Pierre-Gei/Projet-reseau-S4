@@ -6,7 +6,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
+#include <SDL2/SDL.h>
+#include "structure.h"
 #define LG_Message 256
 
 int main(int argc, char *argv[])
