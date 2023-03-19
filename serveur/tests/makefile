@@ -1,5 +1,5 @@
-test: structure.o test.o user.o fonctions.o matrices.o test_user.o test_fonctions.o test_structure.o
-	gcc -g -static -o test structure.o test.o user.o fonctions.o matrices.o test_user.o test_fonctions.o test_structure.o -Wall -lcunit
+test: structure.o test.o user.o fonctions.o matrices.o test_user.o test_fonctions.o test_structure.o test_matrices.o
+	gcc -g -static -o test structure.o test.o user.o fonctions.o matrices.o test_user.o test_fonctions.o test_structure.o test_matrices.o -Wall -lcunit
 
 structure.o: ../structure.c
 	gcc -g -c ../structure.c -lcunit
@@ -24,6 +24,9 @@ test_fonctions.o: test_fonctions.c
 
 test_structure.o: test_structure.c
 	gcc -g -c test_structure.c -lcunit
+
+test_matrices.o: test_matrices.c
+	gcc -g -c test_matrices.c -lcunit
  
 clean:
 	rm -f serveur test *.o 
