@@ -8,11 +8,7 @@
 #define lenght_base64 4
 #define BASE_64 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-
-
-
-
-void convert_BASE_64_RGB(char *base64, int *r, int *g, int *b)
+void convert_BASE_64_RGB(char *base64, Uint8 *r, Uint8 *g, Uint8 *b)
 {
     int i;
     int rgb = 0;
@@ -26,22 +22,22 @@ void convert_BASE_64_RGB(char *base64, int *r, int *g, int *b)
     *b = rgb & 0xFF;
 }
 
-void separate_string(char string[], int size, int width, int height, SDL_ColorRect colorRect[height][width])
-{
-    int k = 0;
-    for (int i = 0; i < height; i++)
-    {
-        for (int j = 0; j < width; j++)
-        {
-            char temp[5];
-            for (k; k < 4; k++)
-            {
-                temp[k] = string[k];
-            }
-            convert_BASE_64_RGB(temp, &colorRect[i][j].color.r, &colorRect[i][j].color.g, &colorRect[i][j].color.b);
-        }
-    }
-}
+// void separate_string(char string[], int size, int width, int height, CASE colorRect[height][width])
+// {
+//     int k = 0;
+//     for (int i = 0; i < height+1; i++)
+//     {
+//         for (int j = 0; j < width+1; j++)
+//         {
+//             char temp[5];
+//             for (k; k < 4; k++)
+//             {
+//                 temp[k] = string[k];
+//             }
+//             convert_BASE_64_RGB(temp, &colorRect[i][j].color.r, &colorRect[i][j].color.g, &colorRect[i][j].color.b);
+//         }
+//     }
+// }
 
 
 void convert_RGB_BASE_64(int r, int g, int b, char *base64)
