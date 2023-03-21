@@ -24,7 +24,21 @@ void convert_BASE_64_RGB(char *base64, Uint8 *r, Uint8 *g, Uint8 *b)
 
 void separate_string(char string[], int size, int width, int height, CASE colorRect[height][width])
 {
-    convert_BASE_64_RGB(string, &colorRect[height][width].color.r, &colorRect[height][width].color.g, &colorRect[height][width].color.b);
+    char tab[4];
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            for (int k = 0; k < lenght_base64; k++)
+            {
+                tab[k] = string[i * width * lenght_base64 + j * lenght_base64 + k];
+            }
+            printf("%s\n", tab);
+            convert_BASE_64_RGB(tab, &colorRect[i][j].color.r, &colorRect[i][j].color.g, &colorRect[i][j].color.b);
+            colorRect[i][j].color.a = 255;
+            memset(tab, 0, sizeof(tab));
+        }
+    }
 }
 
 

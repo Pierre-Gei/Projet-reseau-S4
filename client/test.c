@@ -63,26 +63,49 @@ void test_convert_BASE_64_RGB()
 
 void test_separate_string()
 {
-    char string[]= "////";
+    char string[] = "AAD/////////////AP8A////";
     int size = strlen(string);
-    CASE colorRect[0][1];
-    separate_string(string, size, 0, 0, colorRect);
-    printf ("%d %d %d %d %d %d %d %d\n", colorRect[0][0].color.r, colorRect[0][0].color.g, colorRect[0][0].color.b, colorRect[0][0].color.a, colorRect[0][0].rect.x, colorRect[0][0].rect.y, colorRect[0][0].rect.w, colorRect[0][0].rect.h);
-  
+    int width = 3;
+    int height = 2;
+    CASE colorRect[height][width];
+    separate_string(string, size, width, height, colorRect);
+    CU_ASSERT_EQUAL(colorRect[0][0].color.r, 0);
+    CU_ASSERT_EQUAL(colorRect[0][0].color.g, 0);
+    CU_ASSERT_EQUAL(colorRect[0][0].color.b, 255);
+    CU_ASSERT_EQUAL(colorRect[0][1].color.r, 255);
+    CU_ASSERT_EQUAL(colorRect[0][1].color.g, 255);
+    CU_ASSERT_EQUAL(colorRect[0][1].color.b, 255);
+    CU_ASSERT_EQUAL(colorRect[0][2].color.r, 255);
+    CU_ASSERT_EQUAL(colorRect[0][2].color.g, 255);
+    CU_ASSERT_EQUAL(colorRect[0][2].color.b, 255);
+    CU_ASSERT_EQUAL(colorRect[1][0].color.r, 255);
+    CU_ASSERT_EQUAL(colorRect[1][0].color.g, 255);
+    CU_ASSERT_EQUAL(colorRect[1][0].color.b, 255);
+    CU_ASSERT_EQUAL(colorRect[1][1].color.r, 0);
+    CU_ASSERT_EQUAL(colorRect[1][1].color.g, 255);
+    CU_ASSERT_EQUAL(colorRect[1][1].color.b, 0);
+    CU_ASSERT_EQUAL(colorRect[1][2].color.r, 255);
+    CU_ASSERT_EQUAL(colorRect[1][2].color.g, 255);
+    CU_ASSERT_EQUAL(colorRect[1][2].color.b, 255);
 }
+
 
 int main() 
 {
     CU_initialize_registry();
-    CASE colorRect = initColorRect(colorRect);
-    printf("%d %d %d %d %d %d %d %d\n", colorRect.color.r, colorRect.color.g, colorRect.color.b, colorRect.color.a, colorRect.rect.x, colorRect.rect.y, colorRect.rect.w, colorRect.rect.h);
+    CASE colorRect [2][2];
+    
 
     CU_pSuite suite_test_convert_RGB_BASE_64 = CU_add_suite("convert_RGB_BASE_64", NULL, NULL);
     CU_add_test(suite_test_convert_RGB_BASE_64, "test_convert_RGB_BASE_64", test_convert_RGB_BASE_64);
 
     CU_pSuite suite_test_convert_BASE_64_RGB = CU_add_suite("convert_BASE_64_RGB", NULL, NULL);
     CU_add_test(suite_test_convert_BASE_64_RGB, "test_convert_BASE_64_RGB", test_convert_BASE_64_RGB);
-    test_separate_string();
+
+    CU_pSuite suite_test_separate_string = CU_add_suite("separate_string", NULL, NULL);
+    CU_add_test(suite_test_separate_string, "test_separate_string", test_separate_string);
+    
+
     CU_basic_run_tests();
     CU_cleanup_registry();
 
