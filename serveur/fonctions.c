@@ -153,6 +153,12 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
                 strcpy(messageEnvoi, "11 Pixel out of bound\n");
                 return;
             }
+
+            if(verif_BASE_64(argv[2])==1)
+            {
+                strcpy(messageEnvoi, "12 Bad Color\n");
+                return;
+            }
             timeOut(user, matrix);
             if (user->pixel > 0)
             {
@@ -165,7 +171,7 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
                 printf ("pixel apres : %d\n", user->pixel);
                 strcpy(messageEnvoi, "00 OK\n");
             }
-            else 
+            else
             {
                 strcpy(messageEnvoi, "20 Out of quota\n");
             }

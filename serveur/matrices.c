@@ -39,6 +39,41 @@ void convert_BASE_64_RGB(char *base64, int *r, int *g, int *b)
     *b = rgb & 0xFF;
 }
 
+int verif_BASE_64(char *base64)
+{
+    int i,r,g,b;
+    int rgb = 0;
+    if (strlen(base64)>4)
+    {
+        return 1;
+    }
+    for (i = 0; i < lenght_base64; i++)
+    {
+        rgb <<= 6;
+        rgb += strchr(BASE_64, base64[i]) - BASE_64;
+    }
+    r = (rgb >> 16) & 0xFF;
+    g = (rgb >> 8) & 0xFF;
+    b = rgb & 0xFF;
+    if (r>255 || r<0)
+    {
+        return 1;
+    }
+    else if (b>255 || b<0)
+    {
+        return 1;
+    }
+    else if (g>255 || g<0)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+
+}
+
 //add change a pixel in the matrix
 void editPixel(Matrix m, int x, int y, char *base64){
     if (x >= 0 && x < m.width && y >= 0 && y < m.height)
