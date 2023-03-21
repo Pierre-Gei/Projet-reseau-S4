@@ -22,22 +22,10 @@ void convert_BASE_64_RGB(char *base64, Uint8 *r, Uint8 *g, Uint8 *b)
     *b = rgb & 0xFF;
 }
 
-// void separate_string(char string[], int size, int width, int height, CASE colorRect[height][width])
-// {
-//     int k = 0;
-//     for (int i = 0; i < height+1; i++)
-//     {
-//         for (int j = 0; j < width+1; j++)
-//         {
-//             char temp[5];
-//             for (k; k < 4; k++)
-//             {
-//                 temp[k] = string[k];
-//             }
-//             convert_BASE_64_RGB(temp, &colorRect[i][j].color.r, &colorRect[i][j].color.g, &colorRect[i][j].color.b);
-//         }
-//     }
-// }
+void separate_string(char string[], int size, int width, int height, CASE colorRect[height][width])
+{
+    convert_BASE_64_RGB(string, &colorRect[height][width].color.r, &colorRect[height][width].color.g, &colorRect[height][width].color.b);
+}
 
 
 void convert_RGB_BASE_64(int r, int g, int b, char *base64)

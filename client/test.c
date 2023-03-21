@@ -63,10 +63,11 @@ void test_convert_BASE_64_RGB()
 
 void test_separate_string()
 {
-    char string[]= "////AAAA";
+    char string[]= "////";
     int size = strlen(string);
     CASE colorRect[0][1];
-    separate_string(string, size, 1, 0, colorRect);
+    separate_string(string, size, 0, 0, colorRect);
+    printf ("%d %d %d %d %d %d %d %d\n", colorRect[0][0].color.r, colorRect[0][0].color.g, colorRect[0][0].color.b, colorRect[0][0].color.a, colorRect[0][0].rect.x, colorRect[0][0].rect.y, colorRect[0][0].rect.w, colorRect[0][0].rect.h);
   
 }
 
