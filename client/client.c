@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <SDL2/SDL.h>
 #include "structure.h"
+#include "affichage.h"
 #define LG_Message 256
 
 int main(int argc, char *argv[])
@@ -84,31 +85,53 @@ int main(int argc, char *argv[])
     printf("Largeur: %d, Hauteur: %d \n", largeur, hauteur);
     char messageRecu[SIZE];
 
+    SDL_Window *window = NULL;
+    SDL_Renderer *renderer = NULL;
+    init(&window, &renderer);
+    int width, height;
+    SDL_GetWindowSize(window, &width, &height);
+
     printf("Connexion au serveur réussie avec succès !\n\n");
 
     // Communication avec le serveur
     while (1)
     {
-        printf("Message à envoyer : ");
-        fgets(messageEnvoi, LG_Message * sizeof(char), stdin);
+        memset(messageEnvoi, 0x00, LG_Message);
+        SDL_Event event;
 
-        // Suppression du caractère de fin de ligne
-        messageEnvoi[strlen(messageEnvoi) - 1] = '\0';
-
-        // Envoi du message au serveur
-        ecrits = write(socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
-
-        if (ecrits < 0)
+        while (SDL_PollEvent(&event))
         {
-            perror("write");
-            exit(-3);
+            switch (event.type)
+            {
+            case SDL_QUIT:
+                exit(0);
+                break;
+            case SDL_KEYDOWN:
+                switch (event.key.keysym.sym)
+                {
+                case SDLK_ESCAPE:
+                    exit(0);
+                    break;
+                default:
+                    break;
+                }
+                break;
+            default:
+                break;
+            }
         }
-        if (strlen(messageEnvoi) == 0)
+
+        if (strlen(messageEnvoi) != 0)
         {
-            printf("Message vide \n");
-        }
-        else
-        {
+            // Envoi du message au serveur
+            ecrits = write(socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
+
+            if (ecrits < 0)
+            {
+                perror("write");
+                exit(-3);
+            }
+
             // Réception de la réponse du serveur
             memset(messageRecu, 0x00, SIZE);
             lus = read(socketClient, messageRecu, SIZE);
@@ -128,6 +151,14 @@ int main(int argc, char *argv[])
                 printf("Réponse du serveur : %s\n\n", messageRecu);
             }
         }
+        SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_Rect rect = {0, 0, width - 0.25 * width, height - 0.25 * height};
+        rect.x = width / 2 - rect.w / 2;
+        rect.y = height / 2 - rect.h / 2;
+        SDL_RenderFillRect(renderer, &rect);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderPresent(renderer);
     }
 
     // Fermeture de la socket client
