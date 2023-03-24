@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <SDL2/SDL.h>
 #include "structure.h"
+#include "conversion.h"
 #include "affichage.h"
 #define LG_Message 256
 
@@ -93,11 +94,17 @@ int main(int argc, char *argv[])
 
     printf("Connexion au serveur réussie avec succès !\n\n");
 
+    CASE cases[14];
+    initTabCases(cases);
+    SDL_Point mouse;
+    char color[4];
+
     // Communication avec le serveur
     while (1)
     {
         memset(messageEnvoi, 0x00, LG_Message);
         SDL_Event event;
+        SDL_GetMouseState(&mouse.x, &mouse.y);
 
         while (SDL_PollEvent(&event))
         {
@@ -114,6 +121,18 @@ int main(int argc, char *argv[])
                     break;
                 default:
                     break;
+                }
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                if (event.button.button == SDL_BUTTON_LEFT)
+                {
+                    for (int i = 0; i < 14; i++)
+                    {
+                        if(SDL_PointInRect(&mouse, &cases[i].rect))
+                        {
+                            convert_RGB_BASE_64(cases[i].color.r, cases[i].color.g, cases[i].color.b, color);
+                        }
+                    }
                 }
                 break;
             default:
@@ -152,10 +171,12 @@ int main(int argc, char *argv[])
             }
         }
         SDL_RenderClear(renderer);
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        SDL_Rect rect = {0, 0, width - 0.25 * width, height - 0.25 * height};
+        
+        SDL_Rect rect = {0, 0, 700, 500};
         rect.x = width / 2 - rect.w / 2;
         rect.y = height / 2 - rect.h / 2;
+        color_picker(renderer, width, height, messageRecu, cases, 14);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderFillRect(renderer, &rect);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderPresent(renderer);
