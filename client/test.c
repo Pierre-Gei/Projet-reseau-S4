@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 #include "structure.h"
 #include "conversion.h"
+#include "affichage.h"
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
@@ -89,6 +90,14 @@ void test_separate_string()
     CU_ASSERT_EQUAL(colorRect[1][2].color.b, 255);
 }
 
+void test_color_picker()
+{
+    SDL_Renderer *renderer;
+    SDL_Window *window;
+    init(&window, &renderer);
+    color_picker(renderer,1920, 1080, "AAD/////////////AP8A////");
+}
+
 
 int main() 
 {
@@ -105,6 +114,7 @@ int main()
     CU_pSuite suite_test_separate_string = CU_add_suite("separate_string", NULL, NULL);
     CU_add_test(suite_test_separate_string, "test_separate_string", test_separate_string);
     
+    test_color_picker();
 
     CU_basic_run_tests();
     CU_cleanup_registry();
