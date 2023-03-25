@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <SDL2/SDL.h>
 #include "structure.h"
+#include "liaison.h"
 #include "conversion.h"
 #include "affichage.h"
 #define LG_Message 256
@@ -36,7 +37,16 @@ int main(int argc, char *argv[])
     int socketClient;
     struct sockaddr_in pointDeRencontreDistant;
     char messageEnvoi[LG_Message];
-    int ecrits, lus;
+    int ecrits = 0 , lus = 0;
+    char dimension[20];
+    int widthMatrix = 0, heightMatrix = 0;
+    int SIZE = 0;
+    SDL_Window *window = NULL;
+    SDL_Renderer *renderer = NULL;
+    CASE cases[14];
+    initTabCases(cases);
+    SDL_Point mouse;
+    char color[4];
 
     // Création de la socket, protocole TCP
     socketClient = socket(PF_INET, SOCK_STREAM, 0);
@@ -63,41 +73,37 @@ int main(int argc, char *argv[])
         exit(-2);
     }
 
-    sprintf(messageEnvoi, "/getSize");
+    send_message(socketClient, "/getSize", ecrits);
 
-    ecrits = write(socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
+    
 
-    if (ecrits < 0)
-    {
-        perror("write");
-        exit(-3);
-    }
-    char dim[20];
-    lus = read(socketClient, dim, 20 * sizeof(char));
+    receive_message(socketClient, dimension, lus, 20);
 
-    if (lus < 0)
-    {
-        perror("read");
-        exit(-4);
-    }
-    int largeur, hauteur;
-    sscanf(dim, "%dx%d", &largeur, &hauteur);
-    int SIZE = largeur * hauteur * 4 + 1;
-    printf("Largeur: %d, Hauteur: %d \n", largeur, hauteur);
+    
+    sscanf(dimension, "%dx%d", &widthMatrix, &heightMatrix);
+    SIZE = widthMatrix * heightMatrix * 4 + 1;
+    printf("widthMatrix: %d, heightMatrix: %d \n", widthMatrix, heightMatrix);
     char messageRecu[SIZE];
 
-    SDL_Window *window = NULL;
-    SDL_Renderer *renderer = NULL;
+    
     init(&window, &renderer);
     int width, height;
     SDL_GetWindowSize(window, &width, &height);
 
     printf("Connexion au serveur réussie avec succès !\n\n");
 
-    CASE cases[14];
-    initTabCases(cases);
-    SDL_Point mouse;
-    char color[4];
+    CASE colorRect[heightMatrix][widthMatrix];
+
+    send_message(socketClient, "/getMatrix", ecrits);
+    receive_message(socketClient, messageRecu, lus, SIZE);
+    if (strlen(messageRecu) != 0)
+    {
+        separate_string(messageRecu, SIZE, widthMatrix, heightMatrix, width, height, colorRect);
+    }
+    else 
+    {
+        exit(-1);
+    }
 
     // Communication avec le serveur
     while (1)
@@ -143,32 +149,12 @@ int main(int argc, char *argv[])
         if (strlen(messageEnvoi) != 0)
         {
             // Envoi du message au serveur
-            ecrits = write(socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
+            send_message(socketClient, messageEnvoi, ecrits);
 
-            if (ecrits < 0)
-            {
-                perror("write");
-                exit(-3);
-            }
+            memset(messageRecu, 0x00, SIZE);
 
             // Réception de la réponse du serveur
-            memset(messageRecu, 0x00, SIZE);
-            lus = read(socketClient, messageRecu, SIZE);
-
-            if (lus < 0)
-            {
-                perror("read");
-                exit(-4);
-            }
-            else if (lus == 0)
-            {
-                printf("Le serveur a coupé la connexion.\n");
-                break;
-            }
-            else
-            {
-                printf("Réponse du serveur : %s\n\n", messageRecu);
-            }
+            receive_message(socketClient, messageRecu, lus, SIZE);
         }
         SDL_RenderClear(renderer);
         
