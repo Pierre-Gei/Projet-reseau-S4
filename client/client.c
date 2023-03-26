@@ -190,7 +190,6 @@ int main(int argc, char *argv[])
         
         color_picker(renderer, width, height, messageRecu, cases, 14);
         draw_matrix(renderer, widthMatrix, heightMatrix, colorRect);
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderPresent(renderer);
     }

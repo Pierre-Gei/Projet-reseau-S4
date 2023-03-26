@@ -181,7 +181,7 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
     }
     else if (strcmp(argv[0], "/getVersion") == 0)
     {
-        strcpy(messageEnvoi, "1.0");
+        strcpy(messageEnvoi, "1");
     }
     else if (strcmp(argv[0], "/getWaitTime") == 0)
     {
