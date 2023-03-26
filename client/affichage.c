@@ -73,3 +73,46 @@ void color_picker(SDL_Renderer *renderer, int width_screen, int height_screen, c
         }
     }
 }
+
+int min (int a, int b)
+{
+    if (a < b)
+    {
+        return a;
+    }
+    else
+    {
+        return b;
+    }
+}
+
+void position_case_matrix(int width_screen, int height_screen, int MatrixWidth, int MatrixHeight, CASE colorRect[MatrixHeight][MatrixWidth])
+{
+    int cote = min(width_screen / MatrixWidth, height_screen / MatrixHeight);
+    int x = (width_screen - MatrixWidth * cote) / 2;
+    int y = (height_screen - MatrixHeight * cote) / 2;
+    for (int i = 0; i < MatrixHeight; i++)
+    {
+        for (int j = 0; j < MatrixWidth; j++)
+        {
+            colorRect[i][j].rect.x = x + j * cote;
+            colorRect[i][j].rect.y = y + i * cote;
+            colorRect[i][j].rect.w = cote;
+            colorRect[i][j].rect.h = cote;
+        }
+    }
+}
+
+void draw_matrix(SDL_Renderer *renderer, int MatrixWidth, int MatrixHeight, CASE colorRect[MatrixHeight][MatrixWidth])
+{
+    for (int i = 0; i < MatrixHeight; i++)
+    {
+        for (int j = 0; j < MatrixWidth; j++)
+        {
+            SDL_SetRenderDrawColor(renderer, colorRect[i][j].color.r, colorRect[i][j].color.g, colorRect[i][j].color.b, colorRect[i][j].color.a);
+            SDL_RenderFillRect(renderer, &colorRect[i][j].rect);
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderDrawRect(renderer, &colorRect[i][j].rect);
+        }
+    }
+}

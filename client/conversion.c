@@ -21,18 +21,18 @@ void convert_BASE_64_RGB(char *base64, Uint8 *r, Uint8 *g, Uint8 *b)
     *b = rgb & 0xFF;
 }
 
-void separate_string(char string[], int size, int width, int height, int windowWidth, int windowHeight, CASE colorRect[height][width])
+
+void separate_string(char string[], int size, int MatrixWidth, int MatrixHeight, CASE colorRect[MatrixHeight][MatrixWidth])
 {
     char tab[4];
-    for (int i = 0; i < height; i++)
+    for (int i = 0; i < MatrixHeight; i++)
     {
-        for (int j = 0; j < width; j++)
+        for (int j = 0; j < MatrixWidth; j++)
         {
             for (int k = 0; k < lenght_base64; k++)
             {
-                tab[k] = string[i * width * lenght_base64 + j * lenght_base64 + k];
+                tab[k] = string[i * MatrixWidth * lenght_base64 + j * lenght_base64 + k];
             }
-            // printf("%s\n", tab);
             convert_BASE_64_RGB(tab, &colorRect[i][j].color.r, &colorRect[i][j].color.g, &colorRect[i][j].color.b);
             colorRect[i][j].color.a = 255;
             memset(tab, 0, sizeof(tab));

@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
     initTabCases(cases);
     SDL_Point mouse;
     char color[4];
+    int chrono = SDL_GetTicks();
 
     // Création de la socket, protocole TCP
     socketClient = socket(PF_INET, SOCK_STREAM, 0);
@@ -98,7 +99,8 @@ int main(int argc, char *argv[])
     receive_message(socketClient, messageRecu, lus, SIZE);
     if (strlen(messageRecu) != 0)
     {
-        separate_string(messageRecu, SIZE, widthMatrix, heightMatrix, width, height, colorRect);
+        separate_string(messageRecu, SIZE, widthMatrix, heightMatrix, colorRect);
+        position_case_matrix(width, 900, widthMatrix, heightMatrix, colorRect);
     }
     else 
     {
@@ -108,10 +110,27 @@ int main(int argc, char *argv[])
     // Communication avec le serveur
     while (1)
     {
+        
         memset(messageEnvoi, 0x00, LG_Message);
         SDL_Event event;
         SDL_GetMouseState(&mouse.x, &mouse.y);
 
+        //chronometre toutes les 200 millisecondes
+        if (SDL_GetTicks() - chrono > 200)
+        {
+            chrono = SDL_GetTicks();
+            send_message(socketClient, "/getMatrix", ecrits);
+            receive_message(socketClient, messageRecu, lus, SIZE);
+            if (strlen(messageRecu) != 0)
+            {
+                separate_string(messageRecu, SIZE, widthMatrix, heightMatrix, colorRect);
+                position_case_matrix(width, 900, widthMatrix, heightMatrix, colorRect);
+            }
+            else 
+            {
+                exit(-1);
+            }
+        }
         while (SDL_PollEvent(&event))
         {
             switch (event.type)
@@ -139,6 +158,17 @@ int main(int argc, char *argv[])
                             convert_RGB_BASE_64(cases[i].color.r, cases[i].color.g, cases[i].color.b, color);
                         }
                     }
+
+                    for (int i = 0; i < heightMatrix; i++)
+                    {
+                        for (int j = 0; j < widthMatrix; j++)
+                        {
+                            if (SDL_PointInRect(&mouse, &colorRect[i][j].rect))
+                            {
+                                sprintf(messageEnvoi, "/setPixel %dx%d %s", j, i, color);
+                            }
+                        }
+                    }
                 }
                 break;
             default:
@@ -158,12 +188,9 @@ int main(int argc, char *argv[])
         }
         SDL_RenderClear(renderer);
         
-        SDL_Rect rect = {0, 0, 700, 500};
-        rect.x = width / 2 - rect.w / 2;
-        rect.y = height / 2 - rect.h / 2;
         color_picker(renderer, width, height, messageRecu, cases, 14);
+        draw_matrix(renderer, widthMatrix, heightMatrix, colorRect);
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        SDL_RenderFillRect(renderer, &rect);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderPresent(renderer);
     }
