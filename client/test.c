@@ -69,7 +69,7 @@ void test_separate_string()
     int width = 3;
     int height = 2;
     CASE colorRect[height][width];
-    separate_string(string, size, width, height,100,100, colorRect);
+    separate_string(string, size, width, height, colorRect);
     CU_ASSERT_EQUAL(colorRect[0][0].color.r, 0);
     CU_ASSERT_EQUAL(colorRect[0][0].color.g, 0);
     CU_ASSERT_EQUAL(colorRect[0][0].color.b, 255);

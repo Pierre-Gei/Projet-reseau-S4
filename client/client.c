@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -41,6 +40,8 @@ int main(int argc, char *argv[])
     char dimension[20];
     int widthMatrix = 0, heightMatrix = 0;
     int SIZE = 0;
+    int version = 0;
+    
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
     CASE cases[14];
@@ -74,17 +75,20 @@ int main(int argc, char *argv[])
         exit(-2);
     }
 
+    //Récupérer la taille de la matrice
     send_message(socketClient, "/getSize", ecrits);
-
-    
-
     receive_message(socketClient, dimension, lus, 20);
-
-    
     sscanf(dimension, "%dx%d", &widthMatrix, &heightMatrix);
     SIZE = widthMatrix * heightMatrix * 4 + 1;
     printf("widthMatrix: %d, heightMatrix: %d \n", widthMatrix, heightMatrix);
     char messageRecu[SIZE];
+    memset(dimension, 0, 20);
+
+    //Récupérer la version du serveur
+    send_message(socketClient, "/getVersion", ecrits);
+    receive_message(socketClient, dimension, lus, 20);
+    sscanf(dimension, "%d", &version);
+    printf("Version du serveur: %d \n", version);
 
     
     init(&window, &renderer);
@@ -130,6 +134,7 @@ int main(int argc, char *argv[])
             {
                 exit(-1);
             }
+
         }
         while (SDL_PollEvent(&event))
         {
@@ -196,6 +201,7 @@ int main(int argc, char *argv[])
 
     // Fermeture de la socket client
     close(socketClient);
+    
 
     return 0;
 }
