@@ -20,4 +20,4 @@ clean:
 	rm -f serveur test *.o 
 
 scp:
-	scp serveur grpA4@192.168.200.13:
+	scp serveur pixelwar:
