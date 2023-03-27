@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "structure.h"
 #include "liaison.h"
 #include "conversion.h"
@@ -14,6 +15,7 @@
 
 int main(int argc, char *argv[])
 {
+    // Découpage des arguments
     if (argc < 4)
     {
         printf("Invalid arguments \n");
@@ -23,10 +25,12 @@ int main(int argc, char *argv[])
     char *ip;
     for (int i = 0; i < argc; i++)
     {
+        // Vérification de l'ip
         if (strcmp(argv[i], "-s") == 0)
         {
             ip = argv[i + 1];
         }
+        // Vérification du port
         if (strcmp(argv[i], "-p") == 0 && atoi(argv[i + 1]) > 0)
         {
             PORT = atoi(argv[i + 1]);
@@ -36,19 +40,35 @@ int main(int argc, char *argv[])
     int socketClient;
     struct sockaddr_in pointDeRencontreDistant;
     char messageEnvoi[LG_Message];
-    int ecrits = 0 , lus = 0;
-    char dimension[20];
+    int ecrits = 0, lus = 0;
+
+    char tmp[20];
+    char timeText[20];
     int widthMatrix = 0, heightMatrix = 0;
+    int colorPickerWidth = 0, colorPickerHeight = 0;
     int SIZE = 0;
+    int limit = 0;
     int version = 0;
-    
+    int waitTime = 0;
+
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
+    SDL_Texture *tVersion = NULL;
+    SDL_Rect rVersion;
+    SDL_Texture *tLimits = NULL;
+    SDL_Rect rLimits;
+    SDL_Texture *tTime = NULL;
+    SDL_Rect rTime;
+    SDL_Color colorWhite = {255, 255, 255, 255};
     CASE cases[14];
-    initTabCases(cases);
+    initColorPicker(cases);
     SDL_Point mouse;
-    char color[4];
+
+    char color[5];
+    sprintf(color, "%s", "////");
+    
     int chrono = SDL_GetTicks();
+    int chronoTime = SDL_GetTicks();
 
     // Création de la socket, protocole TCP
     socketClient = socket(PF_INET, SOCK_STREAM, 0);
@@ -75,38 +95,52 @@ int main(int argc, char *argv[])
         exit(-2);
     }
 
-    //Récupérer la taille de la matrice
+    // Récupérer la taille de la matrice
     send_message(socketClient, "/getSize", ecrits);
-    receive_message(socketClient, dimension, lus, 20);
-    sscanf(dimension, "%dx%d", &widthMatrix, &heightMatrix);
+    receive_message(socketClient, tmp, lus, 20);
+    sscanf(tmp, "%dx%d", &widthMatrix, &heightMatrix);
     SIZE = widthMatrix * heightMatrix * 4 + 1;
     printf("widthMatrix: %d, heightMatrix: %d \n", widthMatrix, heightMatrix);
     char messageRecu[SIZE];
-    memset(dimension, 0, 20);
+    memset(tmp, 0, 20);
 
-    //Récupérer la version du serveur
-    send_message(socketClient, "/getVersion", ecrits);
-    receive_message(socketClient, dimension, lus, 20);
-    sscanf(dimension, "%d", &version);
-    printf("Version du serveur: %d \n", version);
-
-    
     init(&window, &renderer);
-    int width, height;
-    SDL_GetWindowSize(window, &width, &height);
+    int windowWidth, windowHeight;
+    SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+
+    // Récupérer la version du serveur
+    send_message(socketClient, "/getVersion", ecrits);
+    receive_message(socketClient, tmp, lus, 20);
+    sscanf(tmp, "%d", &version);
+    char versionText[20];
+    sprintf(versionText, "Version: %d", version);
+    affichage_text(&tVersion, 20, &rVersion, &renderer, versionText, colorWhite);
+    rVersion.x = 10;
+    rVersion.y = windowHeight - rVersion.h - 10;
+
+    // Récupérer la limite de pixel par minute
+    send_message(socketClient, "/getLimits", ecrits);
+    receive_message(socketClient, tmp, lus, 20);
+    sscanf(tmp, "%d", &limit);
+    char limitText[20];
+    sprintf(limitText, "Limit: %d p / min", limit);
+    affichage_text(&tLimits, 20, &rLimits, &renderer, limitText, colorWhite);
+    rLimits.x = 10;
+    rLimits.y = windowHeight - rLimits.h - 10 - rVersion.h - 10;
 
     printf("Connexion au serveur réussie avec succès !\n\n");
 
     CASE colorRect[heightMatrix][widthMatrix];
+    color_picker(windowWidth, windowHeight, cases, 14, &colorPickerWidth, &colorPickerHeight);
 
     send_message(socketClient, "/getMatrix", ecrits);
     receive_message(socketClient, messageRecu, lus, SIZE);
     if (strlen(messageRecu) != 0)
     {
         separate_string(messageRecu, SIZE, widthMatrix, heightMatrix, colorRect);
-        position_case_matrix(width, 900, widthMatrix, heightMatrix, colorRect);
+        position_case_matrix(windowWidth, windowHeight - colorPickerHeight -20 , widthMatrix, heightMatrix, colorRect);
     }
-    else 
+    else
     {
         exit(-1);
     }
@@ -114,12 +148,11 @@ int main(int argc, char *argv[])
     // Communication avec le serveur
     while (1)
     {
-        
         memset(messageEnvoi, 0x00, LG_Message);
         SDL_Event event;
         SDL_GetMouseState(&mouse.x, &mouse.y);
 
-        //chronometre toutes les 200 millisecondes
+        // chronometre toutes les 200 millisecondes
         if (SDL_GetTicks() - chrono > 200)
         {
             chrono = SDL_GetTicks();
@@ -128,14 +161,27 @@ int main(int argc, char *argv[])
             if (strlen(messageRecu) != 0)
             {
                 separate_string(messageRecu, SIZE, widthMatrix, heightMatrix, colorRect);
-                position_case_matrix(width, 900, widthMatrix, heightMatrix, colorRect);
+                position_case_matrix(windowWidth, windowHeight - colorPickerHeight -20, widthMatrix, heightMatrix, colorRect);
             }
-            else 
+            else
             {
                 exit(-1);
             }
-
+            
         }
+
+        if (SDL_GetTicks() - chronoTime > 1000)
+        {
+            send_message(socketClient, "/getWaitTime", ecrits);
+            receive_message(socketClient, tmp, lus, 20);
+            sscanf(tmp, "%d", &waitTime);
+            sprintf(timeText, "Wait: %d s", waitTime);
+            affichage_text(&tTime, 20, &rTime, &renderer, timeText, colorWhite);
+            rTime.x = windowWidth - rTime.w - 10;
+            rTime.y = windowHeight - rTime.h - 10;
+            chronoTime = SDL_GetTicks();
+        }
+
         while (SDL_PollEvent(&event))
         {
             switch (event.type)
@@ -158,7 +204,7 @@ int main(int argc, char *argv[])
                 {
                     for (int i = 0; i < 14; i++)
                     {
-                        if(SDL_PointInRect(&mouse, &cases[i].rect))
+                        if (SDL_PointInRect(&mouse, &cases[i].rect))
                         {
                             convert_RGB_BASE_64(cases[i].color.r, cases[i].color.g, cases[i].color.b, color);
                         }
@@ -192,16 +238,23 @@ int main(int argc, char *argv[])
             receive_message(socketClient, messageRecu, lus, SIZE);
         }
         SDL_RenderClear(renderer);
-        
-        color_picker(renderer, width, height, messageRecu, cases, 14);
+
+        drawColorPicker(renderer, cases, 14);
         draw_matrix(renderer, widthMatrix, heightMatrix, colorRect);
+        SDL_RenderCopy(renderer, tVersion, NULL, &rVersion);
+        SDL_RenderCopy(renderer, tLimits, NULL, &rLimits);
+        SDL_RenderCopy(renderer, tTime, NULL, &rTime);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderPresent(renderer);
     }
 
     // Fermeture de la socket client
     close(socketClient);
-    
+    if (renderer != NULL)
+        SDL_DestroyRenderer(renderer);
+    if (window != NULL)
+        SDL_DestroyWindow(window);
+    SDL_Quit();
 
     return 0;
 }
