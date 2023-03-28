@@ -56,8 +56,7 @@ void setServer(int argc, char *argv[], int *PORT, Matrix *matrix)
         {
             *PORT = atoi(argv[i + 1]);
         }
-
-        if (strcmp(argv[i], "-s") == 0)
+        else if (strcmp(argv[i], "-s") == 0)
         {
             char *dimensions[20];
             char *token = strtok(argv[i + 1], "x");
@@ -73,16 +72,15 @@ void setServer(int argc, char *argv[], int *PORT, Matrix *matrix)
                 matrix->height = atoi(dimensions[1]);
             }
         }
-
-        if (strcmp(argv[i], "-l") == 0 && atoi(argv[i + 1]) > 0)
+        else if (strcmp(argv[i], "-l") == 0 && atoi(argv[i + 1]) > 0)
         {
             matrix->pixel_min = atoi(argv[i + 1]);
         }
     }
     initPixelsMatrix(matrix);
-    // printMatrix(*matrix);
 }
-void timeOut( User *userList, Matrix *matrix)
+
+void timeOut(User *userList, Matrix *matrix)
 {
     User *tmp = userList;
     time_t now = time(NULL);
@@ -154,7 +152,7 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
                 return;
             }
 
-            if(verif_BASE_64(argv[2])==1)
+            if (verif_BASE_64(argv[2]) == 1)
             {
                 strcpy(messageEnvoi, "12 Bad Color\n");
                 return;
@@ -162,13 +160,13 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
             timeOut(user, matrix);
             if (user->pixel > 0)
             {
-                if(user->pixel == matrix->pixel_min)
+                if (user->pixel == matrix->pixel_min)
                 {
                     user->time = time(NULL);
                 }
                 strcpy(matrix->pixels[atoi(dimension[1])][atoi(dimension[0])], argv[2]);
                 user->pixel--;
-                printf ("pixel apres : %d\n", user->pixel);
+                printf("pixel apres : %d\n", user->pixel);
                 strcpy(messageEnvoi, "00 OK\n");
             }
             else
@@ -196,7 +194,7 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
         {
             strcpy(messageEnvoi, "0\n");
         }
-        else 
+        else
         {
             sprintf(messageEnvoi, "%d\n", (int)(60 - difftime(time(NULL), user->time)));
         }
@@ -206,4 +204,3 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
         strcpy(messageEnvoi, "99 Unknown command\n");
     }
 }
-
