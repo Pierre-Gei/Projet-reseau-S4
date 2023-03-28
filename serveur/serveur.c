@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
     printf("Matrix: %d %d\n", matrix.width, matrix.height);
     printf("Pixel min: %d\n", matrix.pixel_min);
     User *userList = NULL;
+    DisconnectedUser *disconnectedUserList = NULL;
     int socketEcoute;
     struct sockaddr_in pointDeRencontreLocal;
     struct pollfd *tab = malloc(sizeof(struct pollfd));
@@ -83,12 +84,15 @@ int main(int argc, char *argv[])
             User *tmp = findUserBySocket(userList, tab[i].fd);
             if (tab[i].revents != 0 && i == 0)
             {
-                addUser(&userList, accept(socketEcoute, (struct sockaddr *)&pointDeRencontreDistant, &longueurAdresse), &pointDeRencontreDistant, matrix.pixel_min);
-                printf("Ajout d'un client sur %s:%d\n\n", inet_ntoa(pointDeRencontreDistant.sin_addr), ntohs(pointDeRencontreDistant.sin_port));
+                int acceptSocket = accept(socketEcoute, (struct sockaddr *)&pointDeRencontreDistant, &longueurAdresse);
+                if (userReco(&pointDeRencontreDistant, acceptSocket, disconnectedUserList, &userList) == 0)
+                {
+                    addUser(&userList, acceptSocket, &pointDeRencontreDistant, matrix.pixel_min, 0);
+                }
+                    printf("Ajout d'un client sur %s:%d\n\n", inet_ntoa(pointDeRencontreDistant.sin_addr), ntohs(pointDeRencontreDistant.sin_port));
             }
             if (tab[i].revents != 0 && i > 0)
             {
-                
                 memset(messageRecu, 0x00, LG_Message * sizeof(char));
                 lus = read(tab[i].fd, messageRecu, LG_Message * sizeof(char));
                 if (lus < 0)
@@ -99,6 +103,8 @@ int main(int argc, char *argv[])
                 else if (lus == 0)
                 {
                     printf("Suppression d'un client sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
+                    //ajoute l'utilisateur dans la liste des utilisateurs déconnectés avec l'adresse ip en chaine de caractère
+                    addDisconnectedUser(&disconnectedUserList, tmp->pixel, tmp->time, inet_ntoa(tmp->sockin->sin_addr));
                     deleteUser(&userList, tmp);
                 }
                 else
@@ -117,6 +123,8 @@ int main(int argc, char *argv[])
                         if (ecrits == 0)
                         {
                             printf("Suppression d'un client sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
+                            //ajoute l'utilisateur dans la liste des utilisateurs déconnectés avec l'adresse ip en chaine de caractère
+                            addDisconnectedUser(&disconnectedUserList, tmp->pixel, tmp->time, inet_ntoa(tmp->sockin->sin_addr));
                             deleteUser(&userList, tmp);
                         }
                     }
@@ -125,6 +133,7 @@ int main(int argc, char *argv[])
                 }
             }
         }
+        // deleteDisconnectedUserTimout(&disconnectedUserList);
     }
     // Fermeture de la socket d'écoute
     close(socketEcoute);
