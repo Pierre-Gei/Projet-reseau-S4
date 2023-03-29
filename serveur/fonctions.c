@@ -125,6 +125,7 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
             }
         }
         strcpy(messageEnvoi, afficheM);
+        messageEnvoi[pos] = '\0'; /////////////////////////////////////////////////////////////// Modif
     }
     else if (strcmp(argv[0], "/getSize") == 0)
     {
