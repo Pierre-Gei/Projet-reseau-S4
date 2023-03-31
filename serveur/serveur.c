@@ -114,7 +114,6 @@ int main(int argc, char *argv[])
                         memset(messageEnvoi, 0x00, strlen(messageEnvoi)*sizeof(char));
                         printf("Message de %s:%d : %s\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port), messageRecu);
                         readCommand(messageRecu, messageEnvoi, &matrix, tmp);
-                        printf("%s\n",messageEnvoi);
                         ecrits = write(tmp->socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
 
                         if (ecrits < 0)
