@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     while (1)
     {
         tab = reallocPoll(tab, userList, socketEcoute, &sizeTab);
-        poll(tab, sizeTab, 1000);
+        poll(tab, sizeTab, 100);
         for (int i = 0; i < sizeTab; i++)
         {
             User *tmp = findUserBySocket(userList, tab[i].fd);
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
                 }
                     printf("Ajout d'un client sur %s:%d\n\n", inet_ntoa(pointDeRencontreDistant.sin_addr), ntohs(pointDeRencontreDistant.sin_port));
             }
-            if (tab[i].revents != 0 && i > 0)
+            else if (tab[i].revents != 0 && i > 0)
             {
                 memset(messageRecu, 0x00, LG_Message * sizeof(char));
                 lus = read(tab[i].fd, messageRecu, LG_Message * sizeof(char));
@@ -111,8 +111,10 @@ int main(int argc, char *argv[])
                 {
                     if (strlen(messageRecu) > 0)
                     {
+                        memset(messageEnvoi, 0x00, strlen(messageEnvoi)*sizeof(char));
                         printf("Message de %s:%d : %s\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port), messageRecu);
                         readCommand(messageRecu, messageEnvoi, &matrix, tmp);
+                        printf("%s\n",messageEnvoi);
                         ecrits = write(tmp->socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
 
                         if (ecrits < 0)
@@ -128,8 +130,6 @@ int main(int argc, char *argv[])
                             deleteUser(&userList, tmp);
                         }
                     }
-                    else
-                        continue;
                 }
             }
         }

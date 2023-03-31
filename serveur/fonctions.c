@@ -125,7 +125,7 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
             }
         }
         strcpy(messageEnvoi, afficheM);
-        messageEnvoi[pos] = '\0'; /////////////////////////////////////////////////////////////// Modif
+        
     }
     else if (strcmp(argv[0], "/getSize") == 0)
     {
@@ -193,11 +193,11 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
         timeOut(user, matrix);
         if (user->pixel > 0)
         {
-            strcpy(messageEnvoi, "0\n");
+            strcpy(messageEnvoi, "0");
         }
         else
         {
-            sprintf(messageEnvoi, "%d\n", (int)(60 - difftime(time(NULL), user->time)));
+            sprintf(messageEnvoi, "%d", (int)(60 - difftime(time(NULL), user->time)));
         }
     }
     else
