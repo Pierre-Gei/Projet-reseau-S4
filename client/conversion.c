@@ -22,7 +22,7 @@ void convert_BASE_64_RGB(char *base64, Uint8 *r, Uint8 *g, Uint8 *b)
 
 void separate_string(char string[], int size, int MatrixWidth, int MatrixHeight, CASE colorRect[MatrixHeight][MatrixWidth])
 {
-    char tab[5]; /////////////////////////////////////////// MODIF
+    char tab[5]; 
     memset(tab, 0, sizeof(tab));
     for (int i = 0; i < MatrixHeight; i++)
     {

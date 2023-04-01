@@ -143,13 +143,25 @@ User *findUserBySocket(User *userList, int socket)
     return NULL;
 }
 
-void freeUserList(User *userList) //////////////// a tester
+void freeUserList(User *userList) 
 {
     User *tmp = userList;
     while (tmp != NULL)
     {
         User *suivant = tmp->suivant;
         free(tmp->sockin);
+        free(tmp);
+        tmp = suivant;
+    }
+}
+
+void freeDisconnectedUserList(DisconnectedUser *disconnectedUserList) 
+{
+    DisconnectedUser *tmp = disconnectedUserList;
+    while (tmp != NULL)
+    {
+        DisconnectedUser *suivant = tmp->suivant;
+        free(tmp->ip);
         free(tmp);
         tmp = suivant;
     }

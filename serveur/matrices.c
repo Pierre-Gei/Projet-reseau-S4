@@ -73,7 +73,6 @@ int verif_BASE_64(char *base64)
 
 }
 
-//add change a pixel in the matrix
 void editPixel(Matrix m, int x, int y, char *base64){
     if (x >= 0 && x < m.width && y >= 0 && y < m.height)
     {

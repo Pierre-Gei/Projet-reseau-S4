@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
     Matrix matrix;
     matrix = initMatrix(matrix);
     int PORT = 0;
+    // Initialisation du serveur avec les arguments
     setServer(argc, argv, &PORT, &matrix);
     printf("\nPort: %d\n", PORT);
     printf("Matrix: %d %d\n", matrix.width, matrix.height);
@@ -74,8 +75,11 @@ int main(int argc, char *argv[])
     // Attente de la demande de connexion d'un client
     while (1)
     {
+        //Vérifier la suppresion des utilisateurs déconnectés
         deleteDisconnectedUserTimout(&disconnectedUserList);
+        //Réallouer la mémoire du tableau de poll pour ajouter les nouveaux clients
         tab = reallocPoll(tab, userList, socketEcoute, &sizeTab);
+        //Vérifier si un client a envoyé un message
         poll(tab, sizeTab, 100);
         for (int i = 0; i < sizeTab; i++)
         {
@@ -83,8 +87,10 @@ int main(int argc, char *argv[])
             if (tab[i].revents != 0 && i == 0)
             {
                 int acceptSocket = accept(socketEcoute, (struct sockaddr *)&pointDeRencontreDistant, &longueurAdresse);
+                //Vérifier si l'utilisateur est dans la liste des utilisateurs déconnectés
                 if (userReco(&pointDeRencontreDistant, acceptSocket, &disconnectedUserList, &userList) == 0)
                 {
+                    //Ajouter l'utilisateur dans la liste des utilisateurs connectés
                     addUser(&userList, acceptSocket, &pointDeRencontreDistant, matrix.pixel_min, 0);
                 }
                 printf("Ajout d'un client sur %s:%d\n\n", inet_ntoa(pointDeRencontreDistant.sin_addr), ntohs(pointDeRencontreDistant.sin_port));
@@ -111,6 +117,7 @@ int main(int argc, char *argv[])
                     {
                         memset(messageEnvoi, 0x00, strlen(messageEnvoi) * sizeof(char));
                         printf("Message de %s:%d : %s\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port), messageRecu);
+                        //Interpréter le message reçu
                         readCommand(messageRecu, messageEnvoi, &matrix, tmp);
                         ecrits = write(tmp->socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
 
@@ -133,6 +140,8 @@ int main(int argc, char *argv[])
     }
     // Fermeture de la socket d'écoute
     close(socketEcoute);
+    //Libération de la mémoire des listes
     freeUserList(userList);
+    freeDisconnectedUserList(disconnectedUserList);
     return 0;
 }
