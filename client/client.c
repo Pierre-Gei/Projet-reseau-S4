@@ -6,7 +6,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
 #include "structure.h"
 #include "liaison.h"
 #include "conversion.h"

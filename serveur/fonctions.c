@@ -1,12 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <poll.h>
-#include <arpa/inet.h>
 #include <time.h>
 
 #include "structure.h"
@@ -39,7 +35,7 @@ struct pollfd *reallocPoll(struct pollfd *tabPoll, User *userList, int socketEco
             tmp = tmp->suivant;
         }
     }
-    // free(tabPoll);
+    free(tabPoll);
     *size = sizeTab;
     return newTab;
 }

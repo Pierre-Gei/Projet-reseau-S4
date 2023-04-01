@@ -1,12 +1,8 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <poll.h>
-#include <arpa/inet.h>
 #include <time.h>
 
 #include "../structure.h"
@@ -38,7 +34,7 @@ void test_timeOut()
 void test_reallocPoll() 
 {
     // Création d'un tableau de test
-    struct pollfd tabPoll[2];
+    struct pollfd *tabPoll = malloc(2 * sizeof(struct pollfd));
     tabPoll[0].fd = 1;
     tabPoll[0].events = POLLIN;
     tabPoll[1].fd = 2;
@@ -54,16 +50,16 @@ void test_reallocPoll()
     int size = 2;
 
     // Appel de la fonction à tester
-    struct pollfd *newTab = reallocPoll(tabPoll, &user1, 5, &size);
+    tabPoll = reallocPoll(tabPoll, &user1, 5, &size);
 
     // Vérification du résultat
-    CU_ASSERT_EQUAL(newTab[0].fd, 5);
-    CU_ASSERT_EQUAL(newTab[0].events, POLLIN);
-    CU_ASSERT_EQUAL(newTab[1].fd, 3);
-    CU_ASSERT_EQUAL(newTab[1].events, POLLIN);
-    CU_ASSERT_EQUAL(newTab[2].fd, 4);
-    CU_ASSERT_EQUAL(newTab[2].events, POLLIN);
+    CU_ASSERT_EQUAL(tabPoll[0].fd, 5);
+    CU_ASSERT_EQUAL(tabPoll[0].events, POLLIN);
+    CU_ASSERT_EQUAL(tabPoll[1].fd, 3);
+    CU_ASSERT_EQUAL(tabPoll[1].events, POLLIN);
+    CU_ASSERT_EQUAL(tabPoll[2].fd, 4);
+    CU_ASSERT_EQUAL(tabPoll[2].events, POLLIN);
 
     // Nettoyage de la mémoire allouée
-    free(newTab);
+    free(tabPoll);
 }

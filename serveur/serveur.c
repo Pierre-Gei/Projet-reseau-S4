@@ -2,12 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <arpa/inet.h>
-#include <time.h>
 
 #include "structure.h"
 #include "user.h"
@@ -35,7 +33,6 @@ int main(int argc, char *argv[])
     char messageRecu[LG_Message];
     int sizeTab = 1;
     int ecrits, lus;
-    int error;
 
     // Création de la socket, protocole TCP
     socketEcoute = socket(PF_INET, SOCK_STREAM, 0);
@@ -77,6 +74,7 @@ int main(int argc, char *argv[])
     // Attente de la demande de connexion d'un client
     while (1)
     {
+        deleteDisconnectedUserTimout(&disconnectedUserList);
         tab = reallocPoll(tab, userList, socketEcoute, &sizeTab);
         poll(tab, sizeTab, 100);
         for (int i = 0; i < sizeTab; i++)
@@ -85,11 +83,11 @@ int main(int argc, char *argv[])
             if (tab[i].revents != 0 && i == 0)
             {
                 int acceptSocket = accept(socketEcoute, (struct sockaddr *)&pointDeRencontreDistant, &longueurAdresse);
-                if (userReco(&pointDeRencontreDistant, acceptSocket, disconnectedUserList, &userList) == 0)
+                if (userReco(&pointDeRencontreDistant, acceptSocket, &disconnectedUserList, &userList) == 0)
                 {
                     addUser(&userList, acceptSocket, &pointDeRencontreDistant, matrix.pixel_min, 0);
                 }
-                    printf("Ajout d'un client sur %s:%d\n\n", inet_ntoa(pointDeRencontreDistant.sin_addr), ntohs(pointDeRencontreDistant.sin_port));
+                printf("Ajout d'un client sur %s:%d\n\n", inet_ntoa(pointDeRencontreDistant.sin_addr), ntohs(pointDeRencontreDistant.sin_port));
             }
             else if (tab[i].revents != 0 && i > 0)
             {
@@ -103,7 +101,7 @@ int main(int argc, char *argv[])
                 else if (lus == 0)
                 {
                     printf("Suppression d'un client sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
-                    //ajoute l'utilisateur dans la liste des utilisateurs déconnectés avec l'adresse ip en chaine de caractère
+                    // ajoute l'utilisateur dans la liste des utilisateurs déconnectés avec l'adresse ip en chaine de caractère
                     addDisconnectedUser(&disconnectedUserList, tmp->pixel, tmp->time, inet_ntoa(tmp->sockin->sin_addr));
                     deleteUser(&userList, tmp);
                 }
@@ -111,7 +109,7 @@ int main(int argc, char *argv[])
                 {
                     if (strlen(messageRecu) > 0)
                     {
-                        memset(messageEnvoi, 0x00, strlen(messageEnvoi)*sizeof(char));
+                        memset(messageEnvoi, 0x00, strlen(messageEnvoi) * sizeof(char));
                         printf("Message de %s:%d : %s\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port), messageRecu);
                         readCommand(messageRecu, messageEnvoi, &matrix, tmp);
                         ecrits = write(tmp->socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
@@ -124,7 +122,7 @@ int main(int argc, char *argv[])
                         if (ecrits == 0)
                         {
                             printf("Suppression d'un client sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
-                            //ajoute l'utilisateur dans la liste des utilisateurs déconnectés avec l'adresse ip en chaine de caractère
+                            // ajoute l'utilisateur dans la liste des utilisateurs déconnectés avec l'adresse ip en chaine de caractère
                             addDisconnectedUser(&disconnectedUserList, tmp->pixel, tmp->time, inet_ntoa(tmp->sockin->sin_addr));
                             deleteUser(&userList, tmp);
                         }
@@ -132,7 +130,6 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        // deleteDisconnectedUserTimout(&disconnectedUserList);
     }
     // Fermeture de la socket d'écoute
     close(socketEcoute);

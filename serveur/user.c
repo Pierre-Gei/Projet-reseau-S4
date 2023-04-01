@@ -1,11 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
-#include <poll.h>
 #include <arpa/inet.h>
 #include <time.h>
 #include "structure.h"
@@ -97,17 +93,17 @@ void deleteDisconnectedUserTimout(DisconnectedUser **disconnectedUserList)
     }
 }
 
-int userReco(struct sockaddr_in *sockin, int socket, DisconnectedUser *listDisconnectedUser, User **userList)
+int userReco(struct sockaddr_in *sockin, int socket, DisconnectedUser **listDisconnectedUser, User **userList)
 {
     printf("userReco\n");
-    DisconnectedUser *tmp = listDisconnectedUser;
+    DisconnectedUser *tmp = *listDisconnectedUser;
     while (tmp != NULL)
     {
         if (strcmp(inet_ntoa(sockin->sin_addr), tmp->ip) == 0)
         {
             printf("userReco : user found\n");
             addUser(userList, socket, sockin, tmp->pixel, tmp->time);
-            deleteDisconnectedUser(&listDisconnectedUser, tmp);
+            deleteDisconnectedUser(listDisconnectedUser, tmp);
             return 1;
         }
         tmp = tmp->suivant;

@@ -1,7 +1,6 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <math.h>
+#include <time.h>
 #include "structure.h"
 
 #define lenght_base64 4
