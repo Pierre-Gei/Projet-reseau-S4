@@ -14,7 +14,17 @@ typedef struct Matrix
     int height;
     int pixel_min;
     char ***pixels;
-}Matrix;
+} Matrix;
+
+typedef struct DisconnectedUser
+{
+    int pixel;
+    time_t time;
+    char *ip;
+    struct DisconnectedUser *suivant;
+    struct DisconnectedUser *precedent;
+
+} DisconnectedUser;
 
 /*Initialiser la structure à 0*/
 Matrix initMatrix(Matrix m);

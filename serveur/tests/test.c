@@ -1,15 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <poll.h>
-#include <arpa/inet.h>
 #include <time.h>
 #include "test_user.h"
-#include "test_fonctions.h"
+#include "test_traitement.h"
 #include "test_structure.h"
 #include "test_matrices.h"
 #include <CUnit/CUnit.h>

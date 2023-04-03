@@ -1,12 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <poll.h>
-#include <arpa/inet.h>
 #include <time.h>
 
 #include "structure.h"
@@ -39,7 +35,7 @@ struct pollfd *reallocPoll(struct pollfd *tabPoll, User *userList, int socketEco
             tmp = tmp->suivant;
         }
     }
-    // free(tabPoll);
+    free(tabPoll);
     *size = sizeTab;
     return newTab;
 }
@@ -125,6 +121,7 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
             }
         }
         strcpy(messageEnvoi, afficheM);
+        
     }
     else if (strcmp(argv[0], "/getSize") == 0)
     {
@@ -166,7 +163,6 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
                 }
                 strcpy(matrix->pixels[atoi(dimension[1])][atoi(dimension[0])], argv[2]);
                 user->pixel--;
-                printf("pixel apres : %d\n", user->pixel);
                 strcpy(messageEnvoi, "00 OK\n");
             }
             else
@@ -192,11 +188,11 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
         timeOut(user, matrix);
         if (user->pixel > 0)
         {
-            strcpy(messageEnvoi, "0\n");
+            strcpy(messageEnvoi, "0");
         }
         else
         {
-            sprintf(messageEnvoi, "%d\n", (int)(60 - difftime(time(NULL), user->time)));
+            sprintf(messageEnvoi, "%d", (int)(60 - difftime(time(NULL), user->time)));
         }
     }
     else

@@ -1,7 +1,8 @@
-
+#include <SDL2/SDL.h>
 typedef struct Case {
     SDL_Color color;
     SDL_Rect rect;
 } CASE;
 
-CASE initColorRect( CASE c);
+/*Intialiser la structure CASE à 0*/
+CASE initColorRect(CASE c);

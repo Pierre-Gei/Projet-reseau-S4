@@ -2,16 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <arpa/inet.h>
-#include <time.h>
 
 #include "structure.h"
 #include "user.h"
-#include "fonctions.h"
+#include "traitement.h"
 
 #define LG_Message 256
 
@@ -20,11 +18,13 @@ int main(int argc, char *argv[])
     Matrix matrix;
     matrix = initMatrix(matrix);
     int PORT = 0;
+    // Initialisation du serveur avec les arguments
     setServer(argc, argv, &PORT, &matrix);
     printf("\nPort: %d\n", PORT);
     printf("Matrix: %d %d\n", matrix.width, matrix.height);
     printf("Pixel min: %d\n", matrix.pixel_min);
     User *userList = NULL;
+    DisconnectedUser *disconnectedUserList = NULL;
     int socketEcoute;
     struct sockaddr_in pointDeRencontreLocal;
     struct pollfd *tab = malloc(sizeof(struct pollfd));
@@ -34,7 +34,6 @@ int main(int argc, char *argv[])
     char messageRecu[LG_Message];
     int sizeTab = 1;
     int ecrits, lus;
-    int error;
 
     // Création de la socket, protocole TCP
     socketEcoute = socket(PF_INET, SOCK_STREAM, 0);
@@ -76,19 +75,28 @@ int main(int argc, char *argv[])
     // Attente de la demande de connexion d'un client
     while (1)
     {
+        //Vérifier la suppresion des utilisateurs déconnectés
+        deleteDisconnectedUserTimout(&disconnectedUserList);
+        //Réallouer la mémoire du tableau de poll pour ajouter les nouveaux clients
         tab = reallocPoll(tab, userList, socketEcoute, &sizeTab);
-        poll(tab, sizeTab, 1000);
+        //Vérifier si un client a envoyé un message
+        poll(tab, sizeTab, 100);
         for (int i = 0; i < sizeTab; i++)
         {
             User *tmp = findUserBySocket(userList, tab[i].fd);
             if (tab[i].revents != 0 && i == 0)
             {
-                addUser(&userList, accept(socketEcoute, (struct sockaddr *)&pointDeRencontreDistant, &longueurAdresse), &pointDeRencontreDistant, matrix.pixel_min);
+                int acceptSocket = accept(socketEcoute, (struct sockaddr *)&pointDeRencontreDistant, &longueurAdresse);
+                //Vérifier si l'utilisateur est dans la liste des utilisateurs déconnectés
+                if (userReco(&pointDeRencontreDistant, acceptSocket, &disconnectedUserList, &userList) == 0)
+                {
+                    //Ajouter l'utilisateur dans la liste des utilisateurs connectés
+                    addUser(&userList, acceptSocket, &pointDeRencontreDistant, matrix.pixel_min, 0);
+                }
                 printf("Ajout d'un client sur %s:%d\n\n", inet_ntoa(pointDeRencontreDistant.sin_addr), ntohs(pointDeRencontreDistant.sin_port));
             }
-            if (tab[i].revents != 0 && i > 0)
+            else if (tab[i].revents != 0 && i > 0)
             {
-                
                 memset(messageRecu, 0x00, LG_Message * sizeof(char));
                 lus = read(tab[i].fd, messageRecu, LG_Message * sizeof(char));
                 if (lus < 0)
@@ -99,13 +107,17 @@ int main(int argc, char *argv[])
                 else if (lus == 0)
                 {
                     printf("Suppression d'un client sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
+                    // ajoute l'utilisateur dans la liste des utilisateurs déconnectés avec l'adresse ip en chaine de caractère
+                    addDisconnectedUser(&disconnectedUserList, tmp->pixel, tmp->time, inet_ntoa(tmp->sockin->sin_addr));
                     deleteUser(&userList, tmp);
                 }
                 else
                 {
                     if (strlen(messageRecu) > 0)
                     {
+                        memset(messageEnvoi, 0x00, strlen(messageEnvoi) * sizeof(char));
                         printf("Message de %s:%d : %s\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port), messageRecu);
+                        //Interpréter le message reçu
                         readCommand(messageRecu, messageEnvoi, &matrix, tmp);
                         ecrits = write(tmp->socketClient, messageEnvoi, strlen(messageEnvoi) * sizeof(char));
 
@@ -117,17 +129,19 @@ int main(int argc, char *argv[])
                         if (ecrits == 0)
                         {
                             printf("Suppression d'un client sur %s:%d\n\n", inet_ntoa(tmp->sockin->sin_addr), ntohs(tmp->sockin->sin_port));
+                            // ajoute l'utilisateur dans la liste des utilisateurs déconnectés avec l'adresse ip en chaine de caractère
+                            addDisconnectedUser(&disconnectedUserList, tmp->pixel, tmp->time, inet_ntoa(tmp->sockin->sin_addr));
                             deleteUser(&userList, tmp);
                         }
                     }
-                    else
-                        continue;
                 }
             }
         }
     }
     // Fermeture de la socket d'écoute
     close(socketEcoute);
+    //Libération de la mémoire des listes
     freeUserList(userList);
+    freeDisconnectedUserList(disconnectedUserList);
     return 0;
 }

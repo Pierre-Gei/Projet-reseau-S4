@@ -14,10 +14,11 @@ void send_message(int socketClient, char *messageEnvoi, int ecrits)
     }
 }
 
-void receive_message(int socketClient, char *messageRecu, int lus, int LG_Message)
+int receive_message(int socketClient, char *messageRecu, int lus, int LG_Message)
 {
     // Réception du message
     lus = read(socketClient, messageRecu, LG_Message);
+    messageRecu[lus] = '\0';
     if (lus < 0)
     {
         perror("read");
@@ -27,4 +28,5 @@ void receive_message(int socketClient, char *messageRecu, int lus, int LG_Messag
     {
         exit(-1);
     }
+    return lus;
 }

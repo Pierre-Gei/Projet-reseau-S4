@@ -23,7 +23,7 @@ void test_addUser()
     int socketClient = 42;
     struct sockaddr_in sockin;
     int pixel = 0;
-    addUser(&userList, socketClient, &sockin, pixel);
+    addUser(&userList, socketClient, &sockin, pixel,0);
 
     // On vérifie que la liste contient un seul utilisateur
     CU_ASSERT_PTR_NOT_NULL(userList);
@@ -37,7 +37,7 @@ void test_addUser()
     int socketClient2 = 43;
     struct sockaddr_in sockin2;
     int pixel2 = 1;
-    addUser(&userList, socketClient2, &sockin2, pixel2);
+    addUser(&userList, socketClient2, &sockin2, pixel2, 0);
 
     // On vérifie que la liste contient deux utilisateurs
     CU_ASSERT_PTR_NOT_NULL(userList);
@@ -59,11 +59,11 @@ void test_deleteUser()
     int socketClient1 = 42;
     struct sockaddr_in sockin1;
     int pixel1 = 0;
-    addUser(&userList, socketClient1, &sockin1, pixel1);
+    addUser(&userList, socketClient1, &sockin1, pixel1,0);
     int socketClient2 = 43;
     struct sockaddr_in sockin2;
     int pixel2 = 1;
-    addUser(&userList, socketClient2, &sockin2, pixel2);
+    addUser(&userList, socketClient2, &sockin2, pixel2,0);
 
     // On supprime le deuxième utilisateur de la liste
     deleteUser(&userList, userList->suivant);
