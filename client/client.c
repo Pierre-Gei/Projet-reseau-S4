@@ -101,7 +101,6 @@ int main(int argc, char *argv[])
     receive_message(socketClient, tmp, lus, 20);
     sscanf(tmp, "%dx%d", &widthMatrix, &heightMatrix);
     SIZE = (widthMatrix * heightMatrix * 4) * sizeof(char);
-    printf("widthMatrix: %d, heightMatrix: %d \n", widthMatrix, heightMatrix);
     char messageRecu[SIZE];
     memset(tmp, 0, 20);
 

@@ -1,5 +1,5 @@
 test :  test.o structure.o conversion.o affichage.o liaison.o test_affichage.o test_conversion.o 
-	gcc -g -o test test.o structure.o conversion.o affichage.o liaison.o test_affichage.o test_conversion.o -Wall -lcunit -lSDL2 -lSDL2_ttf 
+	gcc -g -o test test.o structure.o conversion.o affichage.o liaison.o test_affichage.o test_conversion.o -Wall -lcunit -lSDL2 -lSDL2_ttf
 
 structure.o: ../structure.c
 	gcc -g -c ../structure.c -lSDL2 -Wall

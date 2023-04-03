@@ -9,7 +9,7 @@
 
 #include "structure.h"
 #include "user.h"
-#include "fonctions.h"
+#include "traitement.h"
 
 #define LG_Message 256
 

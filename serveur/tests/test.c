@@ -1,7 +1,7 @@
 #include <string.h>
 #include <time.h>
 #include "test_user.h"
-#include "test_fonctions.h"
+#include "test_traitement.h"
 #include "test_structure.h"
 #include "test_matrices.h"
 #include <CUnit/CUnit.h>

@@ -1,4 +1,4 @@
-
+#include <SDL2/SDL.h>
 typedef struct Case {
     SDL_Color color;
     SDL_Rect rect;

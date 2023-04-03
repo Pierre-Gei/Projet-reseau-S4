@@ -7,7 +7,7 @@
 
 #include "../structure.h"
 #include "../matrices.h"
-#include "../fonctions.h"
+#include "../traitement.h"
 #include "test_user.h"
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>

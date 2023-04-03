@@ -163,7 +163,6 @@ void readCommand(char *messageRecu, char *messageEnvoi, Matrix *matrix, User *us
                 }
                 strcpy(matrix->pixels[atoi(dimension[1])][atoi(dimension[0])], argv[2]);
                 user->pixel--;
-                printf("pixel apres : %d\n", user->pixel);
                 strcpy(messageEnvoi, "00 OK\n");
             }
             else
